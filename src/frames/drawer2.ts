@@ -7,6 +7,6 @@ const drawer2 = new Drawer2({
   }
 });
 
-window.drawer2 = drawer2;
+(window as any).drawer2 = drawer2;
 
 export default drawer2;

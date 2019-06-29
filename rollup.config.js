@@ -67,7 +67,7 @@ export default [
 
   // drawers
   {
-    input: 'src/frames/drawer2.js',
+    input: 'src/frames/drawer2.ts',
     output: {
       sourcemap: true,  
       file: `${buildDir}/drawer2.js`,
@@ -88,7 +88,7 @@ export default [
     ]
   },
   {
-    input: 'src/frames/drawer.js',
+    input: 'src/frames/drawer.ts',
     output: {
       sourcemap: true,  
       file: `${buildDir}/drawer.js`,
