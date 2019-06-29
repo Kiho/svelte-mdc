@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import { mdcAfterUpdate, mdcOnDestroy } from '../useRipple';
 
-  export let fab = null;
+  export let self = null;
   export let ripple = false;
   export let icon = '';
   export let label = '';
@@ -12,10 +12,12 @@
   export let exited = false;
   export let extended = false;
 
-  let mdcComponent, prevRipple;
+  let mdcComponent, mdcRipple, prevRipple;
+  let mdc = { mdcComponent, mdcRipple, ripple, prevRipple };
+  $: mdc.ripple = ripple;
   onMount(() => {
-    mdcAfterUpdate(fab, mdcComponent, ripple, prevRipple, x => prevRipple = x);
-    mdcOnDestroy(mdcComponent);
+    mdcAfterUpdate(self, mdc);
+    mdcOnDestroy(mdc);
   });
 </script>
 
@@ -24,7 +26,7 @@
     class:mdc-fab--mini={mini}
     class:mdc-fab--exited={exited}
     class:mdc-fab--extended={extended}
-    on:click on:mouseup on:mousedown bind:this="{fab}" >    
+    on:click on:mouseup on:mousedown bind:this="{self}" >    
   <span class="material-icons mdc-fab__icon">{icon}</span>
   {#if label}
   <span class="mdc-fab__label">{label}</span>

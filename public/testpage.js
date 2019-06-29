@@ -35,8 +35,14 @@ var testpage = (function () {
     function element(name) {
         return document.createElement(name);
     }
+    function svg_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
+    }
     function text(data) {
         return document.createTextNode(data);
+    }
+    function space() {
+        return text(' ');
     }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
@@ -113,6 +119,9 @@ var testpage = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
+    }
     function flush() {
         const seen_callbacks = new Set();
         do {
@@ -176,6 +185,13 @@ var testpage = (function () {
     }
 
     const globals = (typeof window !== 'undefined' ? window : global);
+
+    function bind(component, name, callback) {
+        if (component.$$.props.indexOf(name) === -1)
+            return;
+        component.$$.bound[name] = callback;
+        callback(component.$$.ctx[name]);
+    }
     function mount_component(component, target, anchor) {
         const { fragment, on_mount, on_destroy, after_render } = component.$$;
         fragment.m(target, anchor);
@@ -1486,27 +1502,30 @@ var testpage = (function () {
     }
     //# sourceMappingURL=helpers.js.map
 
-    function mdcAfterUpdate(target, mdcRipple, ripple, prevRipple, cb) {
+    function mdcAfterUpdate(target, mdc, unbounded, cb) {
         afterUpdate(() => {
-            if (ripple != prevRipple) {
-                if (ripple && !mdcRipple) {
-                    mdcRipple = new MDCRipple(target);
+            if (mdc.ripple != mdc.prevRipple) {
+                if (mdc.ripple && !mdc.mdcRipple) {
+                    mdc.mdcRipple = new MDCRipple(target);
+                    if (unbounded)
+                        mdc.mdcRipple.unbounded = true;
                 }
-                else if (!ripple && mdcRipple) {
-                    mdcRipple.destroy();
-                    mdcRipple = null;
+                else if (!mdc.ripple && mdc.mdcRipple) {
+                    mdc.mdcRipple.destroy();
+                    mdc.mdcRipple = null;
                 }
-                cb(ripple);
+                cb && cb(mdc);
+                mdc.prevRipple = mdc.ripple;
             }
         });
     }
-    function mdcOnDestroy(mdcRipple, mdcComponent) {
+    function mdcOnDestroy(mdc) {
         onDestroy(() => {
-            if (mdcRipple !== null) {
-                mdcRipple.destroy();
+            if (mdc.mdcRipple !== null) {
+                mdc.mdcRipple.destroy();
             }
-            if (mdcComponent) {
-                mdcComponent.destroy();
+            if (mdc.mdcComponent) {
+                mdc.mdcComponent.destroy();
             }
         });
     }
@@ -1525,9 +1544,10 @@ var testpage = (function () {
     			i = element("i");
     			t = text(ctx.icon);
     			attr(i, "class", i_class_value = "material-icons " + ctx.classes);
-    			add_location(i, file, 69, 2, 1626);
+    			add_location(i, file, 74, 2, 1734);
     			attr(button, "class", "mdc-icon-button");
-    			add_location(button, file, 66, 0, 1553);
+    			button.disabled = ctx.disabled;
+    			add_location(button, file, 70, 0, 1646);
     			dispose = listen(i, "click", ctx.onClick);
     		},
 
@@ -1555,6 +1575,10 @@ var testpage = (function () {
     				ctx.button_binding(null, button);
     				ctx.button_binding(button, null);
     			}
+
+    			if (changed.disabled) {
+    				button.disabled = ctx.disabled;
+    			}
     		},
 
     		i: noop,
@@ -1576,34 +1600,35 @@ var testpage = (function () {
 
       const dispatch = createEventDispatcher();
 
-      let { iconButton = null, ripple = false, disabled = false, primary = false, accent = false, value = false, iconOn = '', iconOff = '' } = $$props;
+      let { iconButton = null, ripple = false, disabled = false, primary = false, accent = false, value = false, iconOn = '', iconOff = '', isToggleButton = false } = $$props;
 
       let mdcComponent, mdcRipple, prevRipple;
+      let mdc = { mdcComponent, mdcRipple, ripple, prevRipple };
 
       onMount(() => {
-        mdcComponent = MDCIconButtonToggle.attachTo(iconButton);
-        mdcAfterUpdate(iconButton, mdcRipple, ripple, prevRipple, x => { const $$result = prevRipple = x; return $$result; });
-        mdcOnDestroy(mdcRipple, mdcComponent);
+        $$invalidate('mdcComponent', mdcComponent = MDCIconButtonToggle.attachTo(iconButton));
+        mdcAfterUpdate(iconButton, mdc, true);
+        mdcOnDestroy(mdc);
       });
 
       let { classes } = $$props;
 
       let { icon } = $$props;
 
-      let { dataToggleOn } = $$props;
-
-      let { dataToggleOff } = $$props;
-
       function toggleValue() {
-        $$invalidate('value', value = !value);
-        dispatch('input', { value });
+        if (isToggleButton) {
+          $$invalidate('value', value = !value);
+          dispatch('input', { value });
+        } else {
+          dispatch('icon-clicked');
+        }    
       }
 
       function onClick() {
         debounce(toggleValue());
       }
 
-    	const writable_props = ['iconButton', 'ripple', 'disabled', 'primary', 'accent', 'value', 'iconOn', 'iconOff', 'classes', 'icon', 'dataToggleOn', 'dataToggleOff'];
+    	const writable_props = ['iconButton', 'ripple', 'disabled', 'primary', 'accent', 'value', 'iconOn', 'iconOff', 'isToggleButton', 'classes', 'icon'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<IconToggle> was created with unknown prop '${key}'`);
     	});
@@ -1622,13 +1647,13 @@ var testpage = (function () {
     		if ('value' in $$props) $$invalidate('value', value = $$props.value);
     		if ('iconOn' in $$props) $$invalidate('iconOn', iconOn = $$props.iconOn);
     		if ('iconOff' in $$props) $$invalidate('iconOff', iconOff = $$props.iconOff);
+    		if ('isToggleButton' in $$props) $$invalidate('isToggleButton', isToggleButton = $$props.isToggleButton);
     		if ('classes' in $$props) $$invalidate('classes', classes = $$props.classes);
     		if ('icon' in $$props) $$invalidate('icon', icon = $$props.icon);
-    		if ('dataToggleOn' in $$props) $$invalidate('dataToggleOn', dataToggleOn = $$props.dataToggleOn);
-    		if ('dataToggleOff' in $$props) $$invalidate('dataToggleOff', dataToggleOff = $$props.dataToggleOff);
     	};
 
-    	$$self.$$.update = ($$dirty = { disabled: 1, primary: 1, accent: 1, value: 1, iconOn: 1, iconOff: 1 }) => {
+    	$$self.$$.update = ($$dirty = { ripple: 1, disabled: 1, primary: 1, accent: 1, iconOn: 1, iconOff: 1, isToggleButton: 1, value: 1, mdcComponent: 1 }) => {
+    		if ($$dirty.ripple) { mdc.ripple = ripple; }
     		if ($$dirty.disabled || $$dirty.primary || $$dirty.accent) { {
             const classList = [];
         
@@ -1638,14 +1663,14 @@ var testpage = (function () {
         
             $$invalidate('classes', classes = classList.join(' '));
           } }
-    		if ($$dirty.value || $$dirty.iconOn || $$dirty.iconOff) { {
-            $$invalidate('icon', icon = value ? iconOn : iconOff);
+    		if ($$dirty.iconOn || $$dirty.iconOff) { {
+            $$invalidate('isToggleButton', isToggleButton = iconOn && iconOff);
           } }
-    		if ($$dirty.iconOn) { {
-            $$invalidate('dataToggleOn', dataToggleOn = JSON.stringify({ 'content': iconOn }));
-          } }
-    		if ($$dirty.iconOff) { {
-            $$invalidate('dataToggleOff', dataToggleOff = JSON.stringify({ 'content': iconOff }));
+    		if ($$dirty.isToggleButton || $$dirty.value || $$dirty.iconOn || $$dirty.iconOff || $$dirty.mdcComponent) { {
+            if (isToggleButton) {
+              $$invalidate('icon', icon = value ? iconOn : iconOff);
+            }    
+            if (mdcComponent) { mdcComponent.on = value; $$invalidate('mdcComponent', mdcComponent), $$invalidate('isToggleButton', isToggleButton), $$invalidate('value', value), $$invalidate('iconOn', iconOn), $$invalidate('iconOff', iconOff); }
           } }
     	};
 
@@ -1658,10 +1683,9 @@ var testpage = (function () {
     		value,
     		iconOn,
     		iconOff,
+    		isToggleButton,
     		classes,
     		icon,
-    		dataToggleOn,
-    		dataToggleOff,
     		onClick,
     		button_binding
     	};
@@ -1670,7 +1694,7 @@ var testpage = (function () {
     class IconToggle extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, ["iconButton", "ripple", "disabled", "primary", "accent", "value", "iconOn", "iconOff", "classes", "icon", "dataToggleOn", "dataToggleOff", "onClick"]);
+    		init(this, options, instance, create_fragment, safe_not_equal, ["iconButton", "ripple", "disabled", "primary", "accent", "value", "iconOn", "iconOff", "isToggleButton", "classes", "icon", "onClick"]);
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
@@ -1679,12 +1703,6 @@ var testpage = (function () {
     		}
     		if (ctx.icon === undefined && !('icon' in props)) {
     			console.warn("<IconToggle> was created without expected prop 'icon'");
-    		}
-    		if (ctx.dataToggleOn === undefined && !('dataToggleOn' in props)) {
-    			console.warn("<IconToggle> was created without expected prop 'dataToggleOn'");
-    		}
-    		if (ctx.dataToggleOff === undefined && !('dataToggleOff' in props)) {
-    			console.warn("<IconToggle> was created without expected prop 'dataToggleOff'");
     		}
     		if (ctx.onClick === undefined && !('onClick' in props)) {
     			console.warn("<IconToggle> was created without expected prop 'onClick'");
@@ -1755,6 +1773,14 @@ var testpage = (function () {
     		throw new Error("<IconToggle>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
+    	get isToggleButton() {
+    		throw new Error("<IconToggle>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set isToggleButton(value) {
+    		throw new Error("<IconToggle>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
     	get classes() {
     		throw new Error("<IconToggle>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
@@ -1771,22 +1797,6 @@ var testpage = (function () {
     		throw new Error("<IconToggle>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get dataToggleOn() {
-    		throw new Error("<IconToggle>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set dataToggleOn(value) {
-    		throw new Error("<IconToggle>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get dataToggleOff() {
-    		throw new Error("<IconToggle>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set dataToggleOff(value) {
-    		throw new Error("<IconToggle>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
     	get onClick() {
     		return this.$$.ctx.onClick;
     	}
@@ -1796,27 +1806,682 @@ var testpage = (function () {
     	}
     }
 
+    /**
+     * @license
+     * Copyright 2016 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var jsEventTypeMap = {
+        animationend: {
+            cssProperty: 'animation',
+            prefixed: 'webkitAnimationEnd',
+            standard: 'animationend',
+        },
+        animationiteration: {
+            cssProperty: 'animation',
+            prefixed: 'webkitAnimationIteration',
+            standard: 'animationiteration',
+        },
+        animationstart: {
+            cssProperty: 'animation',
+            prefixed: 'webkitAnimationStart',
+            standard: 'animationstart',
+        },
+        transitionend: {
+            cssProperty: 'transition',
+            prefixed: 'webkitTransitionEnd',
+            standard: 'transitionend',
+        },
+    };
+    function isWindow(windowObj) {
+        return Boolean(windowObj.document) && typeof windowObj.document.createElement === 'function';
+    }
+    function getCorrectEventName(windowObj, eventType) {
+        if (isWindow(windowObj) && eventType in jsEventTypeMap) {
+            var el = windowObj.document.createElement('div');
+            var _a = jsEventTypeMap[eventType], standard = _a.standard, prefixed = _a.prefixed, cssProperty = _a.cssProperty;
+            var isStandard = cssProperty in el.style;
+            return isStandard ? standard : prefixed;
+        }
+        return eventType;
+    }
+    //# sourceMappingURL=util.js.map
+
+    /**
+     * @license
+     * Copyright 2016 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var cssClasses$2 = {
+        ANIM_CHECKED_INDETERMINATE: 'mdc-checkbox--anim-checked-indeterminate',
+        ANIM_CHECKED_UNCHECKED: 'mdc-checkbox--anim-checked-unchecked',
+        ANIM_INDETERMINATE_CHECKED: 'mdc-checkbox--anim-indeterminate-checked',
+        ANIM_INDETERMINATE_UNCHECKED: 'mdc-checkbox--anim-indeterminate-unchecked',
+        ANIM_UNCHECKED_CHECKED: 'mdc-checkbox--anim-unchecked-checked',
+        ANIM_UNCHECKED_INDETERMINATE: 'mdc-checkbox--anim-unchecked-indeterminate',
+        BACKGROUND: 'mdc-checkbox__background',
+        CHECKED: 'mdc-checkbox--checked',
+        CHECKMARK: 'mdc-checkbox__checkmark',
+        CHECKMARK_PATH: 'mdc-checkbox__checkmark-path',
+        DISABLED: 'mdc-checkbox--disabled',
+        INDETERMINATE: 'mdc-checkbox--indeterminate',
+        MIXEDMARK: 'mdc-checkbox__mixedmark',
+        NATIVE_CONTROL: 'mdc-checkbox__native-control',
+        ROOT: 'mdc-checkbox',
+        SELECTED: 'mdc-checkbox--selected',
+        UPGRADED: 'mdc-checkbox--upgraded',
+    };
+    var strings$3 = {
+        ARIA_CHECKED_ATTR: 'aria-checked',
+        ARIA_CHECKED_INDETERMINATE_VALUE: 'mixed',
+        NATIVE_CONTROL_SELECTOR: '.mdc-checkbox__native-control',
+        TRANSITION_STATE_CHECKED: 'checked',
+        TRANSITION_STATE_INDETERMINATE: 'indeterminate',
+        TRANSITION_STATE_INIT: 'init',
+        TRANSITION_STATE_UNCHECKED: 'unchecked',
+    };
+    var numbers$1 = {
+        ANIM_END_LATCH_MS: 250,
+    };
+    //# sourceMappingURL=constants.js.map
+
+    /**
+     * @license
+     * Copyright 2016 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCCheckboxFoundation = /** @class */ (function (_super) {
+        __extends(MDCCheckboxFoundation, _super);
+        function MDCCheckboxFoundation(adapter) {
+            var _this = _super.call(this, __assign({}, MDCCheckboxFoundation.defaultAdapter, adapter)) || this;
+            _this.currentCheckState_ = strings$3.TRANSITION_STATE_INIT;
+            _this.currentAnimationClass_ = '';
+            _this.animEndLatchTimer_ = 0;
+            _this.enableAnimationEndHandler_ = false;
+            return _this;
+        }
+        Object.defineProperty(MDCCheckboxFoundation, "cssClasses", {
+            get: function () {
+                return cssClasses$2;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckboxFoundation, "strings", {
+            get: function () {
+                return strings$3;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckboxFoundation, "numbers", {
+            get: function () {
+                return numbers$1;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckboxFoundation, "defaultAdapter", {
+            get: function () {
+                return {
+                    addClass: function () { return undefined; },
+                    forceLayout: function () { return undefined; },
+                    hasNativeControl: function () { return false; },
+                    isAttachedToDOM: function () { return false; },
+                    isChecked: function () { return false; },
+                    isIndeterminate: function () { return false; },
+                    removeClass: function () { return undefined; },
+                    removeNativeControlAttr: function () { return undefined; },
+                    setNativeControlAttr: function () { return undefined; },
+                    setNativeControlDisabled: function () { return undefined; },
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCCheckboxFoundation.prototype.init = function () {
+            this.currentCheckState_ = this.determineCheckState_();
+            this.updateAriaChecked_();
+            this.adapter_.addClass(cssClasses$2.UPGRADED);
+        };
+        MDCCheckboxFoundation.prototype.destroy = function () {
+            clearTimeout(this.animEndLatchTimer_);
+        };
+        MDCCheckboxFoundation.prototype.setDisabled = function (disabled) {
+            this.adapter_.setNativeControlDisabled(disabled);
+            if (disabled) {
+                this.adapter_.addClass(cssClasses$2.DISABLED);
+            }
+            else {
+                this.adapter_.removeClass(cssClasses$2.DISABLED);
+            }
+        };
+        /**
+         * Handles the animationend event for the checkbox
+         */
+        MDCCheckboxFoundation.prototype.handleAnimationEnd = function () {
+            var _this = this;
+            if (!this.enableAnimationEndHandler_) {
+                return;
+            }
+            clearTimeout(this.animEndLatchTimer_);
+            this.animEndLatchTimer_ = setTimeout(function () {
+                _this.adapter_.removeClass(_this.currentAnimationClass_);
+                _this.enableAnimationEndHandler_ = false;
+            }, numbers$1.ANIM_END_LATCH_MS);
+        };
+        /**
+         * Handles the change event for the checkbox
+         */
+        MDCCheckboxFoundation.prototype.handleChange = function () {
+            this.transitionCheckState_();
+        };
+        MDCCheckboxFoundation.prototype.transitionCheckState_ = function () {
+            if (!this.adapter_.hasNativeControl()) {
+                return;
+            }
+            var oldState = this.currentCheckState_;
+            var newState = this.determineCheckState_();
+            if (oldState === newState) {
+                return;
+            }
+            this.updateAriaChecked_();
+            var TRANSITION_STATE_UNCHECKED = strings$3.TRANSITION_STATE_UNCHECKED;
+            var SELECTED = cssClasses$2.SELECTED;
+            if (newState === TRANSITION_STATE_UNCHECKED) {
+                this.adapter_.removeClass(SELECTED);
+            }
+            else {
+                this.adapter_.addClass(SELECTED);
+            }
+            // Check to ensure that there isn't a previously existing animation class, in case for example
+            // the user interacted with the checkbox before the animation was finished.
+            if (this.currentAnimationClass_.length > 0) {
+                clearTimeout(this.animEndLatchTimer_);
+                this.adapter_.forceLayout();
+                this.adapter_.removeClass(this.currentAnimationClass_);
+            }
+            this.currentAnimationClass_ = this.getTransitionAnimationClass_(oldState, newState);
+            this.currentCheckState_ = newState;
+            // Check for parentNode so that animations are only run when the element is attached
+            // to the DOM.
+            if (this.adapter_.isAttachedToDOM() && this.currentAnimationClass_.length > 0) {
+                this.adapter_.addClass(this.currentAnimationClass_);
+                this.enableAnimationEndHandler_ = true;
+            }
+        };
+        MDCCheckboxFoundation.prototype.determineCheckState_ = function () {
+            var TRANSITION_STATE_INDETERMINATE = strings$3.TRANSITION_STATE_INDETERMINATE, TRANSITION_STATE_CHECKED = strings$3.TRANSITION_STATE_CHECKED, TRANSITION_STATE_UNCHECKED = strings$3.TRANSITION_STATE_UNCHECKED;
+            if (this.adapter_.isIndeterminate()) {
+                return TRANSITION_STATE_INDETERMINATE;
+            }
+            return this.adapter_.isChecked() ? TRANSITION_STATE_CHECKED : TRANSITION_STATE_UNCHECKED;
+        };
+        MDCCheckboxFoundation.prototype.getTransitionAnimationClass_ = function (oldState, newState) {
+            var TRANSITION_STATE_INIT = strings$3.TRANSITION_STATE_INIT, TRANSITION_STATE_CHECKED = strings$3.TRANSITION_STATE_CHECKED, TRANSITION_STATE_UNCHECKED = strings$3.TRANSITION_STATE_UNCHECKED;
+            var _a = MDCCheckboxFoundation.cssClasses, ANIM_UNCHECKED_CHECKED = _a.ANIM_UNCHECKED_CHECKED, ANIM_UNCHECKED_INDETERMINATE = _a.ANIM_UNCHECKED_INDETERMINATE, ANIM_CHECKED_UNCHECKED = _a.ANIM_CHECKED_UNCHECKED, ANIM_CHECKED_INDETERMINATE = _a.ANIM_CHECKED_INDETERMINATE, ANIM_INDETERMINATE_CHECKED = _a.ANIM_INDETERMINATE_CHECKED, ANIM_INDETERMINATE_UNCHECKED = _a.ANIM_INDETERMINATE_UNCHECKED;
+            switch (oldState) {
+                case TRANSITION_STATE_INIT:
+                    if (newState === TRANSITION_STATE_UNCHECKED) {
+                        return '';
+                    }
+                    return newState === TRANSITION_STATE_CHECKED ? ANIM_INDETERMINATE_CHECKED : ANIM_INDETERMINATE_UNCHECKED;
+                case TRANSITION_STATE_UNCHECKED:
+                    return newState === TRANSITION_STATE_CHECKED ? ANIM_UNCHECKED_CHECKED : ANIM_UNCHECKED_INDETERMINATE;
+                case TRANSITION_STATE_CHECKED:
+                    return newState === TRANSITION_STATE_UNCHECKED ? ANIM_CHECKED_UNCHECKED : ANIM_CHECKED_INDETERMINATE;
+                default: // TRANSITION_STATE_INDETERMINATE
+                    return newState === TRANSITION_STATE_CHECKED ? ANIM_INDETERMINATE_CHECKED : ANIM_INDETERMINATE_UNCHECKED;
+            }
+        };
+        MDCCheckboxFoundation.prototype.updateAriaChecked_ = function () {
+            // Ensure aria-checked is set to mixed if checkbox is in indeterminate state.
+            if (this.adapter_.isIndeterminate()) {
+                this.adapter_.setNativeControlAttr(strings$3.ARIA_CHECKED_ATTR, strings$3.ARIA_CHECKED_INDETERMINATE_VALUE);
+            }
+            else {
+                // The on/off state does not need to keep track of aria-checked, since
+                // the screenreader uses the checked property on the checkbox element.
+                this.adapter_.removeNativeControlAttr(strings$3.ARIA_CHECKED_ATTR);
+            }
+        };
+        return MDCCheckboxFoundation;
+    }(MDCFoundation));
+    //# sourceMappingURL=foundation.js.map
+
+    /**
+     * @license
+     * Copyright 2016 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var CB_PROTO_PROPS = ['checked', 'indeterminate'];
+    var MDCCheckbox = /** @class */ (function (_super) {
+        __extends(MDCCheckbox, _super);
+        function MDCCheckbox() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.ripple_ = _this.createRipple_();
+            return _this;
+        }
+        MDCCheckbox.attachTo = function (root) {
+            return new MDCCheckbox(root);
+        };
+        Object.defineProperty(MDCCheckbox.prototype, "ripple", {
+            get: function () {
+                return this.ripple_;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckbox.prototype, "checked", {
+            get: function () {
+                return this.nativeControl_.checked;
+            },
+            set: function (checked) {
+                this.nativeControl_.checked = checked;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckbox.prototype, "indeterminate", {
+            get: function () {
+                return this.nativeControl_.indeterminate;
+            },
+            set: function (indeterminate) {
+                this.nativeControl_.indeterminate = indeterminate;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckbox.prototype, "disabled", {
+            get: function () {
+                return this.nativeControl_.disabled;
+            },
+            set: function (disabled) {
+                this.foundation_.setDisabled(disabled);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCCheckbox.prototype, "value", {
+            get: function () {
+                return this.nativeControl_.value;
+            },
+            set: function (value) {
+                this.nativeControl_.value = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCCheckbox.prototype.initialSyncWithDOM = function () {
+            var _this = this;
+            this.handleChange_ = function () { return _this.foundation_.handleChange(); };
+            this.handleAnimationEnd_ = function () { return _this.foundation_.handleAnimationEnd(); };
+            this.nativeControl_.addEventListener('change', this.handleChange_);
+            this.listen(getCorrectEventName(window, 'animationend'), this.handleAnimationEnd_);
+            this.installPropertyChangeHooks_();
+        };
+        MDCCheckbox.prototype.destroy = function () {
+            this.ripple_.destroy();
+            this.nativeControl_.removeEventListener('change', this.handleChange_);
+            this.unlisten(getCorrectEventName(window, 'animationend'), this.handleAnimationEnd_);
+            this.uninstallPropertyChangeHooks_();
+            _super.prototype.destroy.call(this);
+        };
+        MDCCheckbox.prototype.getDefaultFoundation = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            var adapter = {
+                addClass: function (className) { return _this.root_.classList.add(className); },
+                forceLayout: function () { return _this.root_.offsetWidth; },
+                hasNativeControl: function () { return !!_this.nativeControl_; },
+                isAttachedToDOM: function () { return Boolean(_this.root_.parentNode); },
+                isChecked: function () { return _this.checked; },
+                isIndeterminate: function () { return _this.indeterminate; },
+                removeClass: function (className) { return _this.root_.classList.remove(className); },
+                removeNativeControlAttr: function (attr) { return _this.nativeControl_.removeAttribute(attr); },
+                setNativeControlAttr: function (attr, value) { return _this.nativeControl_.setAttribute(attr, value); },
+                setNativeControlDisabled: function (disabled) { return _this.nativeControl_.disabled = disabled; },
+            };
+            return new MDCCheckboxFoundation(adapter);
+        };
+        MDCCheckbox.prototype.createRipple_ = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            var adapter = __assign({}, MDCRipple.createAdapter(this), { deregisterInteractionHandler: function (evtType, handler) { return _this.nativeControl_.removeEventListener(evtType, handler); }, isSurfaceActive: function () { return matches(_this.nativeControl_, ':active'); }, isUnbounded: function () { return true; }, registerInteractionHandler: function (evtType, handler) { return _this.nativeControl_.addEventListener(evtType, handler); } });
+            return new MDCRipple(this.root_, new MDCRippleFoundation(adapter));
+        };
+        MDCCheckbox.prototype.installPropertyChangeHooks_ = function () {
+            var _this = this;
+            var nativeCb = this.nativeControl_;
+            var cbProto = Object.getPrototypeOf(nativeCb);
+            CB_PROTO_PROPS.forEach(function (controlState) {
+                var desc = Object.getOwnPropertyDescriptor(cbProto, controlState);
+                // We have to check for this descriptor, since some browsers (Safari) don't support its return.
+                // See: https://bugs.webkit.org/show_bug.cgi?id=49739
+                if (!validDescriptor(desc)) {
+                    return;
+                }
+                // Type cast is needed for compatibility with Closure Compiler.
+                var nativeGetter = desc.get;
+                var nativeCbDesc = {
+                    configurable: desc.configurable,
+                    enumerable: desc.enumerable,
+                    get: nativeGetter,
+                    set: function (state) {
+                        desc.set.call(nativeCb, state);
+                        _this.foundation_.handleChange();
+                    },
+                };
+                Object.defineProperty(nativeCb, controlState, nativeCbDesc);
+            });
+        };
+        MDCCheckbox.prototype.uninstallPropertyChangeHooks_ = function () {
+            var nativeCb = this.nativeControl_;
+            var cbProto = Object.getPrototypeOf(nativeCb);
+            CB_PROTO_PROPS.forEach(function (controlState) {
+                var desc = Object.getOwnPropertyDescriptor(cbProto, controlState);
+                if (!validDescriptor(desc)) {
+                    return;
+                }
+                Object.defineProperty(nativeCb, controlState, desc);
+            });
+        };
+        Object.defineProperty(MDCCheckbox.prototype, "nativeControl_", {
+            get: function () {
+                var NATIVE_CONTROL_SELECTOR = MDCCheckboxFoundation.strings.NATIVE_CONTROL_SELECTOR;
+                var el = this.root_.querySelector(NATIVE_CONTROL_SELECTOR);
+                if (!el) {
+                    throw new Error("Checkbox component requires a " + NATIVE_CONTROL_SELECTOR + " element");
+                }
+                return el;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return MDCCheckbox;
+    }(MDCComponent));
+    function validDescriptor(inputPropDesc) {
+        return !!inputPropDesc && typeof inputPropDesc.set === 'function';
+    }
+    //# sourceMappingURL=component.js.map
+
+    /* src\components\Checkbox\Checkbox.svelte generated by Svelte v3.6.1 */
+
+    const file$1 = "src\\components\\Checkbox\\Checkbox.svelte";
+
+    function create_fragment$1(ctx) {
+    	var div2, input, t0, div1, svg, path, t1, div0, dispose;
+
+    	return {
+    		c: function create() {
+    			div2 = element("div");
+    			input = element("input");
+    			t0 = space();
+    			div1 = element("div");
+    			svg = svg_element("svg");
+    			path = svg_element("path");
+    			t1 = space();
+    			div0 = element("div");
+    			attr(input, "type", "checkbox");
+    			attr(input, "class", "mdc-checkbox__native-control");
+    			add_location(input, file$1, 19, 2, 416);
+    			attr(path, "class", "mdc-checkbox__checkmark__path");
+    			attr(path, "fill", "none");
+    			attr(path, "stroke", "white");
+    			attr(path, "d", "M1.73,12.91 8.1,19.28 22.79,4.59");
+    			add_location(path, file$1, 22, 6, 613);
+    			attr(svg, "class", "mdc-checkbox__checkmark");
+    			attr(svg, "viewBox", "0 0 24 24");
+    			add_location(svg, file$1, 21, 4, 549);
+    			attr(div0, "class", "mdc-checkbox__mixedmark");
+    			add_location(div0, file$1, 24, 4, 739);
+    			attr(div1, "class", "mdc-checkbox__background");
+    			add_location(div1, file$1, 20, 2, 506);
+    			attr(div2, "class", "mdc-checkbox");
+    			add_location(div2, file$1, 18, 0, 370);
+    			dispose = listen(input, "change", ctx.input_change_handler);
+    		},
+
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert(target, div2, anchor);
+    			append(div2, input);
+
+    			input.checked = ctx.checked;
+
+    			append(div2, t0);
+    			append(div2, div1);
+    			append(div1, svg);
+    			append(svg, path);
+    			append(div1, t1);
+    			append(div1, div0);
+    			add_binding_callback(() => ctx.div2_binding(div2, null));
+    		},
+
+    		p: function update(changed, ctx) {
+    			if (changed.checked) input.checked = ctx.checked;
+    			if (changed.items) {
+    				ctx.div2_binding(null, div2);
+    				ctx.div2_binding(div2, null);
+    			}
+    		},
+
+    		i: noop,
+    		o: noop,
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach(div2);
+    			}
+
+    			ctx.div2_binding(null, div2);
+    			dispose();
+    		}
+    	};
+    }
+
+    function instance$1($$self, $$props, $$invalidate) {
+    	
+
+      let { self = null, checked = false, indeterminate = false, mdcCheckbox = null } = $$props;
+
+      onMount(() => {
+        $$invalidate('mdcCheckbox', mdcCheckbox = MDCCheckbox.attachTo(self));
+      });
+
+      onDestroy(() => {
+        mdcCheckbox.destroy();
+      });
+
+    	const writable_props = ['self', 'checked', 'indeterminate', 'mdcCheckbox'];
+    	Object.keys($$props).forEach(key => {
+    		if (!writable_props.includes(key) && !key.startsWith('$$')) console.warn(`<Checkbox> was created with unknown prop '${key}'`);
+    	});
+
+    	function input_change_handler() {
+    		checked = this.checked;
+    		$$invalidate('checked', checked);
+    	}
+
+    	function div2_binding($$node, check) {
+    		self = $$node;
+    		$$invalidate('self', self);
+    	}
+
+    	$$self.$set = $$props => {
+    		if ('self' in $$props) $$invalidate('self', self = $$props.self);
+    		if ('checked' in $$props) $$invalidate('checked', checked = $$props.checked);
+    		if ('indeterminate' in $$props) $$invalidate('indeterminate', indeterminate = $$props.indeterminate);
+    		if ('mdcCheckbox' in $$props) $$invalidate('mdcCheckbox', mdcCheckbox = $$props.mdcCheckbox);
+    	};
+
+    	return {
+    		self,
+    		checked,
+    		indeterminate,
+    		mdcCheckbox,
+    		input_change_handler,
+    		div2_binding
+    	};
+    }
+
+    class Checkbox extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, ["self", "checked", "indeterminate", "mdcCheckbox"]);
+    	}
+
+    	get self() {
+    		throw new Error("<Checkbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set self(value) {
+    		throw new Error("<Checkbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get checked() {
+    		throw new Error("<Checkbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set checked(value) {
+    		throw new Error("<Checkbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get indeterminate() {
+    		throw new Error("<Checkbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set indeterminate(value) {
+    		throw new Error("<Checkbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get mdcCheckbox() {
+    		throw new Error("<Checkbox>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set mdcCheckbox(value) {
+    		throw new Error("<Checkbox>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
     /* src\frames\TestPage.svelte generated by Svelte v3.6.1 */
     const { console: console_1 } = globals;
 
-    function create_fragment$1(ctx) {
-    	var current;
+    function create_fragment$2(ctx) {
+    	var updating_ripple, t, updating_checked, current;
 
-    	var icontoggle = new IconToggle({
-    		props: {
-    		ripple: true,
+    	function icontoggle_ripple_binding(value) {
+    		ctx.icontoggle_ripple_binding.call(null, value);
+    		updating_ripple = true;
+    		add_flush_callback(() => updating_ripple = false);
+    	}
+
+    	let icontoggle_props = {
     		value: ctx.iconToggle,
     		iconOn: "favorite",
     		iconOff: "favorite_border",
     		accent: true
-    	},
-    		$$inline: true
-    	});
+    	};
+    	if (ctx.ripple !== void 0) {
+    		icontoggle_props.ripple = ctx.ripple;
+    	}
+    	var icontoggle = new IconToggle({ props: icontoggle_props, $$inline: true });
+
+    	add_binding_callback(() => bind(icontoggle, 'ripple', icontoggle_ripple_binding));
     	icontoggle.$on("input", ctx.input_handler);
+
+    	function checkbox_checked_binding(value_1) {
+    		ctx.checkbox_checked_binding.call(null, value_1);
+    		updating_checked = true;
+    		add_flush_callback(() => updating_checked = false);
+    	}
+
+    	let checkbox_props = {};
+    	if (ctx.ripple !== void 0) {
+    		checkbox_props.checked = ctx.ripple;
+    	}
+    	var checkbox = new Checkbox({ props: checkbox_props, $$inline: true });
+
+    	add_binding_callback(() => bind(checkbox, 'checked', checkbox_checked_binding));
 
     	return {
     		c: function create() {
     			icontoggle.$$.fragment.c();
+    			t = space();
+    			checkbox.$$.fragment.c();
     		},
 
     		l: function claim(nodes) {
@@ -1825,29 +2490,49 @@ var testpage = (function () {
 
     		m: function mount(target, anchor) {
     			mount_component(icontoggle, target, anchor);
+    			insert(target, t, anchor);
+    			mount_component(checkbox, target, anchor);
     			current = true;
     		},
 
     		p: function update(changed, ctx) {
     			var icontoggle_changes = {};
     			if (changed.iconToggle) icontoggle_changes.value = ctx.iconToggle;
+    			if (!updating_ripple && changed.ripple) {
+    				icontoggle_changes.ripple = ctx.ripple;
+    			}
     			icontoggle.$set(icontoggle_changes);
+
+    			var checkbox_changes = {};
+    			if (!updating_checked && changed.ripple) {
+    				checkbox_changes.checked = ctx.ripple;
+    			}
+    			checkbox.$set(checkbox_changes);
     		},
 
     		i: function intro(local) {
     			if (current) return;
     			transition_in(icontoggle.$$.fragment, local);
 
+    			transition_in(checkbox.$$.fragment, local);
+
     			current = true;
     		},
 
     		o: function outro(local) {
     			transition_out(icontoggle.$$.fragment, local);
+    			transition_out(checkbox.$$.fragment, local);
     			current = false;
     		},
 
     		d: function destroy(detaching) {
     			destroy_component(icontoggle, detaching);
+
+    			if (detaching) {
+    				detach(t);
+    			}
+
+    			destroy_component(checkbox, detaching);
     		}
     	};
     }
@@ -1856,30 +2541,49 @@ var testpage = (function () {
       console.log('IconToggle clicked', value);
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
-    	let { name = '', iconToggle = false } = $$props;
+    function instance$2($$self, $$props, $$invalidate) {
+    	
+      let { name = '', iconToggle = false, ripple = false } = $$props;
 
-    	const writable_props = ['name', 'iconToggle'];
+    	const writable_props = ['name', 'iconToggle', 'ripple'];
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith('$$')) console_1.warn(`<TestPage> was created with unknown prop '${key}'`);
     	});
+
+    	function icontoggle_ripple_binding(value) {
+    		ripple = value;
+    		$$invalidate('ripple', ripple);
+    	}
 
     	function input_handler(event) {
     		return iconEvent(event.value);
     	}
 
+    	function checkbox_checked_binding(value_1) {
+    		ripple = value_1;
+    		$$invalidate('ripple', ripple);
+    	}
+
     	$$self.$set = $$props => {
     		if ('name' in $$props) $$invalidate('name', name = $$props.name);
     		if ('iconToggle' in $$props) $$invalidate('iconToggle', iconToggle = $$props.iconToggle);
+    		if ('ripple' in $$props) $$invalidate('ripple', ripple = $$props.ripple);
     	};
 
-    	return { name, iconToggle, input_handler };
+    	return {
+    		name,
+    		iconToggle,
+    		ripple,
+    		icontoggle_ripple_binding,
+    		input_handler,
+    		checkbox_checked_binding
+    	};
     }
 
     class TestPage extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, ["name", "iconToggle"]);
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, ["name", "iconToggle", "ripple"]);
     	}
 
     	get name() {
@@ -1895,6 +2599,14 @@ var testpage = (function () {
     	}
 
     	set iconToggle(value) {
+    		throw new Error("<TestPage>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get ripple() {
+    		throw new Error("<TestPage>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set ripple(value) {
     		throw new Error("<TestPage>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }

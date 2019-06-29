@@ -84,6 +84,7 @@ export default [
       }),
       svelte({
         dev: !production,
+        preprocess: { ts }
       }),
       production && terser()
     ]
@@ -99,7 +100,6 @@ export default [
     },
     plugins: [
       typescript({ typescript: tscompile }),
-      resolve(),
       commonjs({
         namedExports: {
           svelte: ['create', 'compile']
@@ -107,7 +107,9 @@ export default [
       }),
       svelte({
         dev: true,
+        preprocess: { ts }
       }),
+      resolve(),
     ]
   }
 ];

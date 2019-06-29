@@ -1,27 +1,29 @@
 import { afterUpdate, onDestroy } from 'svelte';
 import { MDCRipple } from '@material/ripple';
 
-export function mdcAfterUpdate(target: HTMLElement, mdcRipple: any, ripple: boolean, prevRipple: boolean, cb: (x: boolean) => void) {
-	afterUpdate(() => {
-		if (ripple != prevRipple) {
-			if (ripple && !mdcRipple) {
-				mdcRipple = new MDCRipple(target);
-			} else if (!ripple && mdcRipple) {
-				mdcRipple.destroy();
-				mdcRipple = null;
+export function mdcAfterUpdate(target: HTMLElement, mdc: any, unbounded?: boolean, cb?: (mdc: any) => void) {
+	afterUpdate(() => {		
+		if (mdc.ripple != mdc.prevRipple) {
+			if (mdc.ripple && !mdc.mdcRipple) {
+				mdc.mdcRipple = new MDCRipple(target);
+			  if (unbounded) mdc.mdcRipple.unbounded = true; 
+			} else if (!mdc.ripple && mdc.mdcRipple) {
+				mdc.mdcRipple.destroy();
+				mdc.mdcRipple = null;
 			}
-			cb(ripple);
+			cb && cb(mdc);
+			mdc.prevRipple = mdc.ripple;
 		}
 	});
 }
 
-export function mdcOnDestroy(mdcRipple: MDCRipple, mdcComponent?: any) {
+export function mdcOnDestroy(mdc: any) {
 	onDestroy(() => {
-		if (mdcRipple !== null) {
-			mdcRipple.destroy();
+		if (mdc.mdcRipple !== null) {
+			mdc.mdcRipple.destroy();
 		}
-		if (mdcComponent) {
-			mdcComponent.destroy();
+		if (mdc.mdcComponent) {
+			mdc.mdcComponent.destroy();
 		}
 	});
 }

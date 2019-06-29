@@ -19,13 +19,16 @@
   export let value = false;
   export let iconOn = '';
   export let iconOff = '';
+  export let isToggleButton = false;
 
   let mdcComponent, mdcRipple, prevRipple;
+  let mdc = { mdcComponent, mdcRipple, ripple, prevRipple };
+  $: mdc.ripple = ripple;
 
   onMount(() => {
     mdcComponent = MDCIconButtonToggle.attachTo(iconButton);
-    mdcAfterUpdate(iconButton, mdcRipple, ripple, prevRipple, x => prevRipple = x);
-    mdcOnDestroy(mdcRipple, mdcComponent);
+    mdcAfterUpdate(iconButton, mdc, true);
+    mdcOnDestroy(mdc);
   });
 
   export let classes;
@@ -39,24 +42,25 @@
     classes = classList.join(' ')
   }
 
-  export let icon;
   $: {
-    icon = value ? iconOn : iconOff
+    isToggleButton = iconOn && iconOff;
   }
 
-  export let dataToggleOn;
+  export let icon;  
   $: {
-    dataToggleOn = JSON.stringify({ 'content': iconOn })
-  }
-
-  export let dataToggleOff;
-  $: {
-    dataToggleOff = JSON.stringify({ 'content': iconOff })
+    if (isToggleButton) {
+      icon = value ? iconOn : iconOff;
+    }    
+    if (mdcComponent) mdcComponent.on = value;
   }
 
   function toggleValue() {
-    value = !value;
-    dispatch('input', { value });
+    if (isToggleButton) {
+      value = !value;
+      dispatch('input', { value });
+    } else {
+      dispatch('icon-clicked');
+    }    
   }
 
   export function onClick() {
@@ -66,7 +70,8 @@
 
 <button
     class="mdc-icon-button"
-    bind:this="{iconButton}" >    
+    bind:this="{iconButton}"
+    {disabled} >    
   <i
     on:click="{onClick}" 
     class="material-icons {classes}"
