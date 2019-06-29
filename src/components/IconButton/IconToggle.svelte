@@ -39,7 +39,7 @@
     primary && classList.push('mdc-icon-toggle--primary');
     accent && classList.push('mdc-icon-toggle--accent');
 
-    classes = classList.join(' ')
+    classes = classList.join(' ');
   }
 
   $: {

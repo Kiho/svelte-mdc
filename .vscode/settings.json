@@ -1,8 +1,5 @@
 {
   "editor.tabSize": 2,
-  "files.associations": {
-    "*.svelte": "html"
-  },
   "eslint.validate": [
     "javascript",
     "javascriptreact",
