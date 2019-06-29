@@ -87,5 +87,27 @@ export default [
       }),
       production && terser()
     ]
+  },
+  // testpage
+  {
+    input: 'src/frames/testpage.ts',
+    output: {
+      sourcemap: true,  
+      file: 'public/testpage.js',
+      format: 'iife',
+      name: 'testpage'
+    },
+    plugins: [
+      typescript({ typescript: tscompile }),
+      resolve(),
+      commonjs({
+        namedExports: {
+          svelte: ['create', 'compile']
+        }
+      }),
+      svelte({
+        dev: true,
+      }),
+    ]
   }
 ];

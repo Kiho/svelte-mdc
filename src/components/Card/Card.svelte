@@ -1,5 +1,5 @@
 <script>
-  import { afterUpdate, onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import { mdcAfterUpdate, mdcOnDestroy } from '../useRipple';
 
   export let self = null;

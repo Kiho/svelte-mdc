@@ -1,41 +1,40 @@
 <script>
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import { MDCIconButtonToggle } from "@material/icon-button";
+  import { debounce } from '../helpers';
+  import { mdcAfterUpdate, mdcOnDestroy } from '../useRipple';
 
   const dispatch = createEventDispatcher();
 
-  export let self = null;
+  export let iconButton = null;
 
-  import { MDCIconButtonToggle } from "@material/icon-button";
-  import { debounce } from '../helpers'
   /*
       :data-toggle-on="dataToggleOn" 
       :data-toggle-off="dataToggleOff" 
   */
+  export let ripple = false;
   export let disabled = false;
   export let primary = false;
   export let accent = false;
   export let value = false;
   export let iconOn = '';
   export let iconOff = '';
-  export let mdcIconToggle = null;
+
+  let mdcComponent, mdcRipple, prevRipple;
 
   onMount(() => {
-    mdcIconToggle = MDCIconButtonToggle.attachTo(self)
-    // this.observe('disabled',  (disabled, mdcIconToggle) => { mdcIconToggle.disabled = disabled })
-    // this.observe('value',  (value, mdcIconToggle) => { mdcIconToggle.on = value })
-  });
-
-  onDestroy(() => {
-    mdcIconToggle.destroy()
+    mdcComponent = MDCIconButtonToggle.attachTo(iconButton);
+    mdcAfterUpdate(iconButton, mdcRipple, ripple, prevRipple, x => prevRipple = x);
+    mdcOnDestroy(mdcRipple, mdcComponent);
   });
 
   export let classes;
   $: {
     const classList = []
 
-    disabled && classList.push('mdc-icon-toggle--disabled')
-    primary && classList.push('mdc-icon-toggle--primary')
-    accent && classList.push('mdc-icon-toggle--accent')
+    disabled && classList.push('mdc-icon-toggle--disabled');
+    primary && classList.push('mdc-icon-toggle--primary');
+    accent && classList.push('mdc-icon-toggle--accent');
 
     classes = classList.join(' ')
   }
@@ -65,11 +64,15 @@
   }
 </script>
 
-<i bind:this={self} 
-  on:click="{onClick}" 
-  class="mdc-icon-toggle material-icons {classes}" 
-  role="button" 
-  >
-  {icon}
-</i>
+<button
+    class="mdc-icon-button"
+    bind:this="{iconButton}" >    
+  <i
+    on:click="{onClick}" 
+    class="material-icons {classes}"
+    >
+    {icon}
+  </i>
+</button>
+
 

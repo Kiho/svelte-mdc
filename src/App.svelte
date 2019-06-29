@@ -7,9 +7,8 @@
     LayoutGrid,
     LayoutGridCell,
 		LayoutGridInner,
-		Drawer,
-		TopAppBar, Menu, MenuItem,
-		Tab, TabBar, TabScroller, TabIndicator
+		Menu, MenuItem,
+		Tab, TabBar, TabScroller
   } from './components';
 
 	export let customStyles = {
@@ -26,7 +25,7 @@
 		dialog.show();
 	}
 
-	function showMenu(e) {
+	function showMenu() {
 		menu.show(true);
 	}
 

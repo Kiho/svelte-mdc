@@ -7,7 +7,7 @@ export function addClassToSlot(owner: HTMLElement, name: string, className: stri
 
 export function addClassToSlotNodes(owner: HTMLElement, name: string, className: string) {
   const el = owner.querySelector(`[slot="${name}"]`);
-  if ( el && el.childNodes){
+  if (el && el.childNodes) {
     el.childNodes.forEach((x: ChildNode) => {
       (x as HTMLElement).classList.add(className);
     });
