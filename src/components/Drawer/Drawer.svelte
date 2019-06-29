@@ -6,7 +6,7 @@
     onMount
   } from "svelte";
   import { MDCDrawer } from '@material/drawer';
-  // import { addClassToSlot, addClassToSlotNodes } from '../helpers';
+  import { addClassToSlot, addClassToSlotNodes } from '../helpers';
 
   export let mdc = 'mdc-drawer';
   export let self = null;
