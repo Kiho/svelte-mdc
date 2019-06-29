@@ -1,15 +1,9 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 
-  // [svelte-upgrade suggestion]
-  // manually refactor all references to __this
-  const __this = {
-    get: () => ({ disabled, primary, accent, value, iconOn, iconOff, mdcIconToggle })
-  };
-
   const dispatch = createEventDispatcher();
 
-  export let self=null;
+  export let self = null;
 
   import { MDCIconButtonToggle } from "@material/icon-button";
   import { debounce } from '../helpers'
@@ -71,7 +65,7 @@
   }
 </script>
 
-<i  bind:this={self} 
+<i bind:this={self} 
   on:click="{onClick}" 
   class="mdc-icon-toggle material-icons {classes}" 
   role="button" 

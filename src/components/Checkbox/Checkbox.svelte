@@ -8,11 +8,11 @@
   export let mdcCheckbox = null;
 
   onMount(() => {
-    mdcCheckbox = MDCCheckbox.attachTo(self)
+    mdcCheckbox = MDCCheckbox.attachTo(self);
   });
 
   onDestroy(() => {
-    mdcCheckbox.destroy()
+    mdcCheckbox.destroy();
   });
 </script>
 
@@ -26,8 +26,3 @@
   </div>
 </div>
 
-
-
-<style type='text/scss'>
-@import "@material/checkbox/mdc-checkbox";
-</style>

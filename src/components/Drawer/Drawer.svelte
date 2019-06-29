@@ -8,8 +8,7 @@
   import { MDCDrawer } from '@material/drawer';
   import { addClassToSlot, addClassToSlotNodes } from '../helpers';
 
-  export let mdc = 'mdc-drawer';
-  export let self = null;
+  export let drawer = null;
   export let primaryToolbarSpacer = false;
   export let primaryContent = '';
   export let slots = $$props.$$slots || {};
@@ -31,11 +30,11 @@
   }
 
   onMount(() => {
-    addClassToSlot(self, 'header', 'mdc-drawer__header');
-    addClassToSlot(self, 'default', 'mdc-drawer__content');
+    addClassToSlot(drawer, 'header', 'mdc-drawer__header');
+    addClassToSlot(drawer, 'default', 'mdc-drawer__content');
 
     if (!mdcComponent && (dismissible || modal)) { 
-      mdcComponent = new MDCDrawer(self);
+      mdcComponent = new MDCDrawer(drawer);
     }
     if (mdcComponent) {
       mdcComponent.listen("MDCDrawer:opened", () => {
@@ -64,7 +63,7 @@
   }
 </script>
 
-<aside bind:this="{self}"    
+<aside bind:this="{drawer}"    
     class="mdc-drawer {dismissible ? 'mdc-drawer--dismissible' : ''}{modal ? 'mdc-drawer--modal' : ''}" >
   <slot name="header" />
   <slot />
