@@ -67,27 +67,6 @@ export default [
 
   // drawers
   {
-    input: 'src/frames/drawer2.ts',
-    output: {
-      sourcemap: true,  
-      file: `${buildDir}/drawer2.js`,
-      format: 'iife',
-      name: 'drawer2'
-    },
-    plugins: [
-      typescript({ typescript: tscompile }),
-      resolve(),
-      commonjs({
-        namedExports: {
-          svelte: ['create', 'compile']
-        }
-      }),
-      svelte({
-        dev: !production,
-      })
-    ]
-  },
-  {
     input: 'src/frames/drawer.ts',
     output: {
       sourcemap: true,  
@@ -105,7 +84,8 @@ export default [
       }),
       svelte({
         dev: !production,
-      })
+      }),
+      production && terser()
     ]
   }
 ];
