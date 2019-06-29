@@ -1,0 +1,8 @@
+.DS_Store
+.rpt2_cache
+node_modules
+public/bundle.*
+public/drawer*.*
+package-lock.json
+yarn.lock
+dist/
