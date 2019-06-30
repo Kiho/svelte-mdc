@@ -14,8 +14,7 @@ export function addClassToSlotNodes(owner: HTMLElement, name: string, className:
   }
 }
 
-export function buildClasses(classes: any, classList: any[]) {
-  classList = classList || []; 
+export function buildClasses(classes: { [index:string] : {value: string} }, classList: string[] = []) {
   Object.keys(classes).forEach(x => {
     classes[x] && classList.push(x);
   }) 
