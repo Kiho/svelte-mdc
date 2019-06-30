@@ -10,7 +10,7 @@ import sass from 'node-sass';
 
 // eslint-disable-next-line no-undef
 const production = !process.env.ROLLUP_WATCH;
-const buildDir = production ? 'dist' : 'public';
+const buildDir = production ? 'dist' : 'public/dist';
 
 export default [
   {
@@ -94,7 +94,7 @@ export default [
     input: 'src/frames/testpage.ts',
     output: {
       sourcemap: true,  
-      file: 'public/testpage.js',
+      file: 'public/dist/testpage.js',
       format: 'iife',
       name: 'testpage'
     },

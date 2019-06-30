@@ -1,9 +1,7 @@
 .DS_Store
 .rpt2_cache
 node_modules
-public/bundle.*
-public/drawer*.*
-public/testpage*.*
 package-lock.json
 yarn.lock
 dist/
+public/dist
