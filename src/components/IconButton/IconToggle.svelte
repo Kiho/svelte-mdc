@@ -8,10 +8,6 @@
 
   export let iconButton = null;
 
-  /*
-      :data-toggle-on="dataToggleOn" 
-      :data-toggle-off="dataToggleOff" 
-  */
   export let ripple = false;
   export let disabled = false;
   export let primary = false;
@@ -64,7 +60,7 @@
   }
 
   export function onClick() {
-    debounce(toggleValue())
+    debounce(toggleValue)();
   }
 </script>
 

@@ -47,11 +47,11 @@
 </Drawer>
 <DrawerAppContent>
   {#if dismissible || modal}
-  <TopAppBar bind:this="{topAppBar}" on:nav="{onNav}" title="Modal Drawer" >
+  <TopAppBar bind:this="{topAppBar}" on:nav="{onNav}" title="{modal ? 'Modal' : 'Dismissible'} Drawer" >
     <a href="#!" slot="navigation" class="material-icons">menu</a>
   </TopAppBar>
   {:else}
-  <TopAppBar bind:this="{topAppBar}"title="Permanent Drawer" ></TopAppBar>
+  <TopAppBar bind:this="{topAppBar}" title="Permanent Drawer" ></TopAppBar>
   {/if}
   <div class="drawer-main-content">
     <TopAppBarFixedAdjust />

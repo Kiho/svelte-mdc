@@ -1,14 +1,14 @@
 import { afterUpdate, onDestroy } from 'svelte';
 import { MDCRipple } from '@material/ripple';
 
-export interface IMDCRipple { 
+export interface IMDCRippleArg { 
 	mdcComponent: any;
-	mdcRipple: MDCRipple | null; 
+	mdcRipple: MDCRipple | undefined; 
 	ripple: boolean;
 	prevRipple: boolean;
 }
 
-export function mdcAfterUpdate(target: HTMLElement, mdc: IMDCRipple, unbounded?: boolean, cb?: (mdc: IMDCRipple) => void) {
+export function mdcAfterUpdate(target: HTMLElement, mdc: IMDCRippleArg, unbounded?: boolean) {
 	afterUpdate(() => {
 		let { mdcRipple, ripple, prevRipple } = mdc;
 		if (ripple != prevRipple) {
@@ -17,18 +17,17 @@ export function mdcAfterUpdate(target: HTMLElement, mdc: IMDCRipple, unbounded?:
 			  if (unbounded) mdc.mdcRipple.unbounded = true; 
 			} else if (!ripple && mdcRipple) {
 				mdcRipple.destroy();
-				mdc.mdcRipple = null;
+				mdc.mdcRipple = undefined;
 			}
-			cb && cb(mdc);
 			mdc.prevRipple = ripple;
 		}
 	});
 }
 
-export function mdcOnDestroy(mdc: IMDCRipple) {
+export function mdcOnDestroy(mdc: IMDCRippleArg) {
 	onDestroy(() => {
 		let { mdcComponent, mdcRipple } = mdc;
-		if (mdcRipple !== null) {
+		if (mdcRipple) {
 			mdcRipple.destroy();
 		}
 		if (mdcComponent) {
