@@ -5,7 +5,7 @@
     onDestroy,
     onMount
   } from 'svelte';
-  import { processClasses, addClassToSlot, addClassToSlotNodes } from '../helpers';
+  import { processClasses, addClassToSlot, addClassToSlotNodes } from '../helpers.js';
   import { MDCTopAppBar } from '@material/top-app-bar';
 
   const dispatch = createEventDispatcher();

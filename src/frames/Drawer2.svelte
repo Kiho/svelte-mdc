@@ -1,37 +1,22 @@
 <script>
-  import { Drawer, DrawerHeader, DrawerContent, DrawerAppContent } from '../components/Drawer';
-  import { TopAppBar, TopAppBarFixedAdjust } from '../components/TopAppBar';
+  import { Drawer } from '../components/Drawer';
+  import { TopAppBar } from '../components/TopAppBar'; 
   import { List, LinkListItem } from '../components/List';
 
-  export let name = "";
-  export let drawer = null;
-  export let topAppBar = null;
-  export let dismissible = false;
-  export let modal = false;
-
-  let attrs = null;
-  if (window.location.search.indexOf('modal') > -1) {
-    modal = true;
-    attrs = { modal }
-  }
-  if (window.location.search.indexOf('dismissible') > -1) {
-    dismissible = true;
-    attrs = { dismissible }
-  }
+  export let drawerOpen = false;
 
   function onNav(e) {
     console.log('e', e);
-    if (dismissible) {
-      drawer.toggle();
-    } else if (modal) {
-      drawer.toggle(true);
-    }
+    drawerOpen = !drawerOpen;
   } 
   
 </script>
-<Drawer bind:this="{drawer}" {...attrs}>
-  <DrawerHeader title="Mail" subtitle="email@material.io"/>
-  <DrawerContent>
+<Drawer dismissible open="{drawerOpen}" >
+  <div slot="header">
+    <h3 class="mdc-drawer__title">Mail</h3>
+    <h6 class="mdc-drawer__subtitle">email@material.io</h6>
+  </div>
+  <div>
     <List ripple>
       <LinkListItem primaryText="Inbox" showGraphic activated>
         <i class="material-icons" slot="graphic">inbox</i>
@@ -43,18 +28,18 @@
         <i class="material-icons" slot="graphic">drafts</i>
       </LinkListItem>
     </List>
-  </DrawerContent>
+  </div>
 </Drawer>
-<DrawerAppContent>
-  {#if dismissible || modal}
-  <TopAppBar bind:this="{topAppBar}" on:nav="{onNav}" title="Modal Drawer" >
-    <a href="#!" slot="navigation" class="material-icons">menu</a>
+<div class="mdc-drawer-app-content">
+  <TopAppBar on:nav="{onNav}">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <a href="#!" class="demo-menu material-icons mdc-top-app-bar__navigation-icon">menu</a>
+        <span class="mdc-top-app-bar__title">Dismissible Drawer</span>
+      </section>
+    </div>
   </TopAppBar>
-  {:else}
-  <TopAppBar bind:this="{topAppBar}"title="Permanent Drawer" ></TopAppBar>
-  {/if}
-  <div class="drawer-main-content">
-    <TopAppBarFixedAdjust />
+  <div class="drawer-main-content"><div class="mdc-top-app-bar--fixed-adjust"></div> 
     <p >Lorem ipsum dolor sit amet, consectetur adipiscing elit,
       sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
       enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -79,5 +64,5 @@
       aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
       voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
       occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
-      anim id est laborum.</p>
-</DrawerAppContent>
+      anim id est laborum.</p></div>
+</div>

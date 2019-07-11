@@ -2,19 +2,14 @@ import svelte from "rollup-plugin-svelte";
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
-import typescript from "rollup-plugin-typescript2";
-import tscompile from "typescript";
-import { ts } from "./svelte.config";
-
 import sass from 'node-sass';
 
-// eslint-disable-next-line no-undef
 const production = !process.env.ROLLUP_WATCH;
 const buildDir = production ? 'dist' : 'public/dist';
 
 export default [
   {
-    input: 'src/main.ts', 
+    input: 'src/main.js', 
     output: {
       sourcemap: true,  
       format: 'iife',
@@ -22,8 +17,6 @@ export default [
       name: 'app'
     },
     plugins: [
-      commonjs({ include: "node_modules/**" }),
-      typescript({ typescript: tscompile }),
       svelte({
         // enable run-time checks when not in production
         dev: !production,
@@ -34,7 +27,6 @@ export default [
         },
 
         preprocess: {
-          ts,
           style: ({ content, attributes }) => {
             if (attributes.type !== 'text/scss') return;
 
@@ -43,20 +35,27 @@ export default [
                 data: content,
                 includePaths: ['src', 'node_modules'],
                 sourceMap: true,
-                outFile: 'x', // this is necessary, but is ignored
+                outFile: 'x' // this is necessary, but is ignored
               }, (err, result) => {
                 if (err) return reject(err);
 
                 fulfill({
-                    code: result.css.toString(),
-                    map: result.map.toString(),
+                  code: result.css.toString(),
+                  map: result.map.toString()
                 });
               });
             });
-          },
+          }
         }
       }),
+
+      // If you have external dependencies installed from
+      // npm, you'll most likely need these plugins. In
+      // some cases you'll need additional configuration —
+      // consult the documentation for details:
+      // https://github.com/rollup/rollup-plugin-commonjs
       resolve(),
+      commonjs(),
 
       production && terser()
     ],
@@ -67,15 +66,14 @@ export default [
 
   // drawers
   {
-    input: 'src/frames/drawer.ts',
+    input: 'src/frames/drawer2.js',
     output: {
       sourcemap: true,  
-      file: `${buildDir}/drawer.js`,
+      file: `${buildDir}/drawer2.js`,
       format: 'iife',
-      name: 'drawer'
+      name: 'drawer2'
     },
     plugins: [
-      typescript({ typescript: tscompile }),
       resolve(),
       commonjs({
         namedExports: {
@@ -84,32 +82,27 @@ export default [
       }),
       svelte({
         dev: !production,
-        preprocess: { ts }
-      }),
-      production && terser()
+      })
     ]
   },
-  // testpage
   {
-    input: 'src/frames/testpage.ts',
+    input: 'src/frames/drawer.js',
     output: {
       sourcemap: true,  
-      file: 'public/dist/testpage.js',
+      file: `${buildDir}/drawer.js`,
       format: 'iife',
-      name: 'testpage'
+      name: 'drawer'
     },
     plugins: [
-      typescript({ typescript: tscompile }),
+      resolve(),
       commonjs({
         namedExports: {
           svelte: ['create', 'compile']
         }
       }),
       svelte({
-        dev: true,
-        preprocess: { ts }
-      }),
-      resolve(),
+        dev: !production,
+      })
     ]
   }
 ];

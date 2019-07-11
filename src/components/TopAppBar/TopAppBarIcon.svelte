@@ -1,5 +1,5 @@
 <script>
-  import { processClasses } from "../helpers";
+  import { processClasses } from "../helpers.js";
   import { Icon } from "../Icon";
 
   // [svelte-upgrade warning]

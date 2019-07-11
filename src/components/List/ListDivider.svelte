@@ -1,5 +1,5 @@
 <script>
-  import { processClasses } from '../helpers';
+  import { processClasses } from '../helpers.js';
   export let inList = false;
 
   // [svelte-upgrade warning]

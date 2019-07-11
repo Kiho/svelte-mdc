@@ -1,4 +1,4 @@
-export * from './Button';
+// export * from './Button';
 export * from './Fab';
 export * from './Card';
 export * from './Checkbox';
@@ -14,5 +14,8 @@ export * from './List';
 export * from './Tab';
 export * from './Menu';
 
-// import MTheme from './MTheme.html'
+import Button from './Button/Button.svelte'
+export { Button }
+
+// import MTheme from './MTheme.svelte'
 

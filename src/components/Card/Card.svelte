@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { afterUpdate, onMount, onDestroy } from 'svelte';
   import { mdcAfterUpdate, mdcOnDestroy } from '../useRipple';
 
   export let self = null;
@@ -17,12 +17,10 @@
   export let classesTitle;
   $: classesTitle = largeTitle && 'mdc-card__title--large';
 
-  let mdcComponent, mdcRipple, prevRipple;
-  let mdc = { mdcComponent, mdcRipple, ripple, prevRipple };
-  $: mdc.ripple = ripple;
+  let mdcComponent, prevRipple;
   onMount(() => {
-    mdcAfterUpdate(self, mdc);
-    mdcOnDestroy(mdc);
+    mdcAfterUpdate(self, mdcComponent, ripple, prevRipple, x => prevRipple = x);
+    mdcOnDestroy(mdcComponent);
   });
 </script>
 

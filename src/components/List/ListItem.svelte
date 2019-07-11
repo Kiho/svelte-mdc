@@ -1,5 +1,5 @@
 <script>
-  import { processClasses } from '../helpers';
+  import { processClasses } from '../helpers.js';
   export let showGraphic = false;
   export let primaryText;
   export let secondText;

@@ -1,7 +1,7 @@
 <script>
   import { onDestroy, onMount } from "svelte";
   import { MDCTabIndicator } from "@material/tab-indicator";
-  import { processClasses } from "../helpers";
+  import { processClasses } from "../helpers.js";
 
   export let indicator;
   export let icon;

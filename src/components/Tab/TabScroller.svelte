@@ -4,7 +4,7 @@
   // [svelte-upgrade suggestion]
   // manually refactor all references to __this
   import { MDCTabScroller } from "@material/tab-scroller";
-  import { processClasses } from "../helpers";
+  import { processClasses } from "../helpers.js";
 
   export let scroller;
   export let checked = false;

@@ -1,6 +1,7 @@
 
 <script>
-  import { onMount } from "svelte";
+  import { afterUpdate, onDestroy, onMount } from "svelte";
+  import { processClasses } from "../helpers.js";
   import { mdcAfterUpdate, mdcOnDestroy } from '../useRipple';
 
   export let self = null;
@@ -12,12 +13,10 @@
   export let exited = false;
   export let extended = false;
 
-  let mdcComponent, mdcRipple, prevRipple;
-  let mdc = { mdcComponent, mdcRipple, ripple, prevRipple };
-  $: mdc.ripple = ripple;
+  let mdcComponent, prevRipple;
   onMount(() => {
-    mdcAfterUpdate(self, mdc);
-    mdcOnDestroy(mdc);
+    mdcAfterUpdate(self, mdcComponent, ripple, prevRipple, x => prevRipple = x);
+    mdcOnDestroy(mdcComponent);
   });
 </script>
 
@@ -33,15 +32,10 @@
   {/if}
 </button>
 
-<style type='text/scss'>
-  .mdc-fab--absolute-right {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-
-    @media(min-width: 1024px) {
-      bottom: 1.5rem;
-      right: 1.5rem;
-    }
-  }
-</style>
+<!-- <style type='text/scss'>
+  // .mdc-fab--absolute-right.mdc-fab--absolute-right {
+  //   position: fixed;
+  //   bottom: 1rem;
+  //   right: 1rem;
+  // }
+</style> -->

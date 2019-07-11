@@ -1,12 +1,12 @@
 import Drawer from './Drawer.svelte';
 
 const drawer = new Drawer({
-  target: document.querySelector('#app-root')!,
+  target: document.querySelector('#app-root'),
   props: {
     name: 'Svelte Material Design Components'
   }
 });
 
-(window as any).drawer = drawer;
+window.drawer = drawer;
 
 export default drawer;

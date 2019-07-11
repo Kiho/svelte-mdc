@@ -1,5 +1,5 @@
 <script>
-  import { processClasses } from "../helpers";
+  import { processClasses } from "../helpers.js";
   export let showMeta = false;
   export let showGraphic = false;
 

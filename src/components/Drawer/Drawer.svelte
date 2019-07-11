@@ -6,9 +6,10 @@
     onMount
   } from "svelte";
   import { MDCDrawer } from '@material/drawer';
-  import { addClassToSlot, addClassToSlotNodes } from '../helpers';
+  import { addClassToSlot, addClassToSlotNodes } from '../helpers.js';
 
-  export let drawer = null;
+  export let mdc = 'mdc-drawer';
+  export let self = null;
   export let primaryToolbarSpacer = false;
   export let primaryContent = '';
   export let slots = $$props.$$slots || {};
@@ -30,11 +31,11 @@
   }
 
   onMount(() => {
-    addClassToSlot(drawer, 'header', 'mdc-drawer__header');
-    addClassToSlot(drawer, 'default', 'mdc-drawer__content');
+    addClassToSlot(self, 'header', 'mdc-drawer__header');
+    addClassToSlot(self, 'default', 'mdc-drawer__content');
 
     if (!mdcComponent && (dismissible || modal)) { 
-      mdcComponent = new MDCDrawer(drawer);
+      mdcComponent = new MDCDrawer(self);
     }
     if (mdcComponent) {
       mdcComponent.listen("MDCDrawer:opened", () => {
@@ -63,7 +64,7 @@
   }
 </script>
 
-<aside bind:this="{drawer}"    
+<aside bind:this="{self}"    
     class="mdc-drawer {dismissible ? 'mdc-drawer--dismissible' : ''}{modal ? 'mdc-drawer--modal' : ''}" >
   <slot name="header" />
   <slot />
