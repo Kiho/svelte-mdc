@@ -25,8 +25,9 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.0.2",
-    "material-components-web": "^2.3.0",
     "eslint": "^6.0.1",
+    "eslint-plugin-svelte3": "^2.7.0",
+    "material-components-web": "^2.3.0",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5",
     "rollup": "^1.13.0",
