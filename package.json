@@ -20,8 +20,10 @@
     "release": "standard-version"
   },
   "peerDependencies": {
-    "material-components-web": ">= 2.3.0",
     "svelte": ">= 3.5.0"
+  },
+  "dependencies": {
+    "material-components-web": ">= 2.3.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.2",
