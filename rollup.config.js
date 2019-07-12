@@ -11,7 +11,7 @@ export default [
   {
     input: 'src/main.js', 
     output: {
-      sourcemap: true,  
+      sourcemap: !production,  
       format: 'iife',
       file: `${buildDir}/bundle.js`,
       name: 'app'
@@ -68,7 +68,7 @@ export default [
   {
     input: 'src/frames/drawer.js',
     output: {
-      sourcemap: true,  
+      sourcemap: !production,  
       file: `${buildDir}/drawer.js`,
       format: 'iife',
       name: 'drawer'
