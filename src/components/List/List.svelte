@@ -2,16 +2,15 @@
   import { onDestroy, onMount } from 'svelte';
   import { MDCList } from '@material/list';
   import { MDCRipple } from '@material/ripple';
-  import { processClasses } from '../helpers.js';
+  import { processClasses } from '../helpers';
   // [svelte-upgrade warning]
   // this function needs to be manually rewritten
   export let slots = $$props.$$slots || {};
   export let attrs = null;
   export let as = 'nav';
-  // export let self = null;
+  export let self = null;
   export let ripple = false;
-  
-  let self;
+
   let mdcComponent, listItemRipples;
   onMount(() => {
     mdcComponent = new MDCList(self);

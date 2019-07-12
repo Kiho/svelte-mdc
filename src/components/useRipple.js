@@ -1,23 +1,29 @@
-import { afterUpdate, onMount, onDestroy } from 'svelte';
+import { afterUpdate, onDestroy } from 'svelte';
 import { MDCRipple } from '@material/ripple';
 
-export function mdcAfterUpdate(target, mdcComponent, ripple, prevRipple, cb) {
+export function mdcAfterUpdate(target, mdc, unbounded) {
 	afterUpdate(() => {
+		let { mdcRipple, ripple, prevRipple } = mdc;
 		if (ripple != prevRipple) {
-			if (ripple && !mdcComponent) {
-				mdcComponent = new MDCRipple(target);
-			} else if (!ripple && mdcComponent) {
-				mdcComponent.destroy();
-				mdcComponent = null;
+			if (ripple && !mdcRipple) {
+				mdc.mdcRipple = new MDCRipple(target);
+			  if (unbounded) mdc.mdcRipple.unbounded = true; 
+			} else if (!ripple && mdcRipple) {
+				mdcRipple.destroy();
+				mdc.mdcRipple = undefined;
 			}
-			cb(ripple);
+			mdc.prevRipple = ripple;
 		}
 	});
 }
 
-export function mdcOnDestroy(mdcComponent) {
+export function mdcOnDestroy(mdc) {
 	onDestroy(() => {
-		if (mdcComponent !== null) {
+		let { mdcComponent, mdcRipple } = mdc;
+		if (mdcRipple) {
+			mdcRipple.destroy();
+		}
+		if (mdcComponent) {
 			mdcComponent.destroy();
 		}
 	});

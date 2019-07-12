@@ -6,7 +6,7 @@
     onMount
   } from "svelte";
   import { MDCTabBar } from "@material/tab-bar";
-  import { processClasses } from "../helpers.js";
+  import { processClasses } from "../helpers";
   
   const dispatch = createEventDispatcher();
 

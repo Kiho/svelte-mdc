@@ -1,7 +1,7 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
   import { MDCRipple } from '@material/ripple';
-  import { buildClasses } from '../helpers.js';
+  import { buildClasses } from '../helpers';
 
   export let self = null;
 
@@ -18,8 +18,8 @@
   export let icon = '';
   export let type = '';
 
-  export let mdcRipple = null;
-  export let classes;
+  let mdcRipple = null;
+  let classes;
 
   $: classes = buildClasses({
       'mdc-button--raised': raised,
@@ -36,7 +36,7 @@
   });
 
   onDestroy(() => {
-    if (mdcComponent) mdcComponent.destroy();
+    if (mdcRipple) mdcRipple.destroy();
   });
 </script>
 

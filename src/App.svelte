@@ -7,9 +7,8 @@
     LayoutGrid,
     LayoutGridCell,
 		LayoutGridInner,
-		Drawer,
-		TopAppBar, Menu, MenuItem,
-		Tab, TabBar, TabScroller, TabIndicator
+		Menu, MenuItem,
+		Tab, TabBar, TabScroller
   } from './components';
 
 	export let customStyles = {
@@ -26,7 +25,7 @@
 		dialog.show();
 	}
 
-	function showMenu(e) {
+	function showMenu() {
 		menu.show(true);
 	}
 
@@ -87,7 +86,7 @@
 	<Title>Checkboxes</Title>
 	<LayoutGridInner>
 		<LayoutGridCell span="1">
-			<Checkbox model="{checkboxValue}" />
+			<Checkbox checked="{checkboxValue}" />
 		</LayoutGridCell>
 	</LayoutGridInner>
 
@@ -185,6 +184,10 @@
 		<LayoutGridCell span="2">
 			<Subheading level="1">Icon</Subheading>
 			<Icon icon="cloud" />
+		</LayoutGridCell>
+		<LayoutGridCell span="2">
+			<Subheading level="1">IconButton</Subheading>
+			<IconToggle icon="favorite" accent />
 		</LayoutGridCell>
 		<LayoutGridCell span="2">
 			<Subheading level="1">IconToggle</Subheading>

@@ -1,5 +1,5 @@
 <script>
-  import { buildClasses } from '../helpers.js';
+  import { buildClasses } from '../helpers';
 
   export let dense = false;
   export let short = false;

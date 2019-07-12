@@ -1,5 +1,5 @@
 <script>
-  import { processClasses } from '../helpers.js';
+  import { processClasses } from '../helpers';
   // [svelte-upgrade warning]
   // this function needs to be manually rewritten
   export let attrs;

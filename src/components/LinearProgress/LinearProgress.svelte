@@ -1,5 +1,5 @@
 <script>
-  import { afterUpdate, onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { MDCLinearProgress } from "@material/linear-progress";
 
   export let self = null;
