@@ -17,7 +17,8 @@
     "dev": "run-p start:dev autobuild",
     "start": "sirv public",
     "start:dev": "sirv public --dev",
-    "release": "standard-version"
+    "release": "standard-version",
+    "prepublishOnly": "run-p build"
   },
   "peerDependencies": {
     "svelte": ">= 3.5.0"
@@ -42,5 +43,10 @@
     "standard": "^10.0.3",
     "standard-version": "^4.2.0",
     "svelte": "^3.6.7"
-  }
+  },
+  "main": "dist/bundle.js",
+  "files": [
+      "dist",
+      "src"
+  ]
 }
