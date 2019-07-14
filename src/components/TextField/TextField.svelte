@@ -13,9 +13,9 @@
     "required"
   ];
 
-  export let placeholder;
-  export let id = '';
-  export let icon;
+  export let placeholder = '';
+  export let id;
+  export let icon = null;
   export let iconMode;
   export let name = '';
   export let disabled = false;
