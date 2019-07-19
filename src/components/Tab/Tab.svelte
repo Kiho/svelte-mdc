@@ -10,11 +10,13 @@
   export let spanningOnlyContent = false;
   export let stacked = false;
   export let minWidth = false;
+  export let className = '';
+
 </script>
 
 <a
   bind:this="{tab}"
-  class="mdc-tab"
+  class="mdc-tab {className}"
   class:mdc-tab--active={active}
   class:mdc-tab--stacked={stacked}
   class:mdc-tab--minWidth={minWidth}

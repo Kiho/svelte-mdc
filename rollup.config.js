@@ -86,14 +86,14 @@ export default [
       production && terser()
     ]
   },
-  // testpage
+  // textField
   {
-    input: 'src/frames/testpage.js',
+    input: 'src/frames/text-field.js',
     output: {
       sourcemap: true,  
-      file: 'public/dist/testpage.js',
+      file: 'public/dist/text-field.js',
       format: 'iife',
-      name: 'testpage'
+      name: 'textField'
     },
     plugins: [
       commonjs({

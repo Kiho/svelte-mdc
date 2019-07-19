@@ -2,6 +2,7 @@
   import { beforeUpdate, onDestroy, onMount } from "svelte";
   import { MDCTextField } from "@material/textfield";
   import { processClasses } from "../helpers";
+  import { Icon } from "../Icon";
 
   const mdcAttrs = [
     "value",
@@ -20,17 +21,18 @@
   export let name = '';
   export let disabled = false;
   export let value;
-  export let hintText = '';
+  export let label = '';
   export let outlined = false;
   export let type = 'text';
+  export let maxLength; 
   // TextArea
   export let textarea = false;
   export let rows = 0;
   export let cols = 0;
   export let helperText = '';
-  import { Icon } from "../Icon";
   
   export let textField;
+  export let slots = $$props.$$slots || {};
 
   const fieldAttrs = [
       "id",
@@ -57,7 +59,7 @@
     //     mdcComponent[key] = current[key];
     //   }
     // }
-    // for (let key of ["iconMode", "helperText", "outlined", "hintText"]) {
+    // for (let key of ["iconMode", "helperText", "outlined", "label"]) {
     //   if (changed[key]) {
     //     mdcComponent.destroy();
     //     mdcComponent = new MDCTextField(textField);
@@ -94,12 +96,11 @@
   function invalidate() {
     console.log('invalidate()');
     mdcComponent.destroy();
-    MDCTextField.attachTo(textField)
-    // mdcComponent = new MDCTextField(textField);
+    mdcComponent = MDCTextField.attachTo(textField);
   }
 
   // $: update(value, min, max, step, maxLength, pattern, required)
-  $: helperText, outlined, hintText, iconMode, mdcComponent && invalidate();
+  $: helperText, outlined, label, iconMode, mdcComponent && invalidate();
 
   export let inputAttrs;
   $: {
@@ -114,6 +115,7 @@
 
   export let attrs;
   $: {
+     console.log('slots', slots);     
     let result = Object.assign({}, $$props);
     let cls = "mdc-text-field";
     let classes = [cls, "text-field"];
@@ -146,6 +148,7 @@
       delete result[key];      
     }
     result["class"] = processClasses(classes, result["class"]);
+    result["maxlength"] = maxLength;
     attrs = result;
   }
 </script>
@@ -174,24 +177,31 @@
     {...inputAttrs}
   />
   {/if}
-  {#if hintText}
-  <label class="mdc-floating-label" for="{id}">{hintText}</label>
-  {/if} {#if icon && iconMode === "trailing"}
+  {#if icon && iconMode === "trailing"}
   <Icon class="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
   {/if} {#if outlined}
-  <div class="mdc-notched-outline">
-    <div class="mdc-notched-outline__leading"></div>
-    <div class="mdc-notched-outline__notch" style="">
-      <label class="mdc-floating-label" style="">Standard</label>
+    <div class="mdc-notched-outline">
+      <div class="mdc-notched-outline__leading"></div>
+      <div class="mdc-notched-outline__notch" style="">
+        <label class="mdc-floating-label" style="">{label}</label>
+      </div>
+      <div class="mdc-notched-outline__trailing"></div>
     </div>
-    <div class="mdc-notched-outline__trailing"></div>
-  </div>
   {:else}
-  <div class="mdc-line-ripple"></div>
+    {#if label}
+    <label class="mdc-floating-label" for="{id}">{label}</label>
+    {/if} 
+    <div class="mdc-line-ripple"></div>
   {/if}
 </div>
-{#if helperText}
-<p id="{id}-helper-text" class="mdc-text-field-helper-text" aria-hidden="true">
-  {helperText}
-</p>
+{#if slots['helperText'] || slots['characterCounter']}
+  <div class="mdc-text-field-helper-line">
+    <div
+      aria-hidden="true"
+      class="mdc-text-field-helper-text"
+    >
+      <slot name="helperText" />
+    </div>
+    <slot name="characterCounter" />
+  </div>
 {/if}

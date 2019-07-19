@@ -10,7 +10,7 @@
 		Menu, MenuItem,
 		Tab, TabBar, TabScroller
   } from '../components';
-  import { TextField } from '../components';
+  import { TextField, TextFieldCharacterCounter } from '../components';
 
   export let name = '';
   export let text = '';
@@ -19,17 +19,14 @@
 
   let label = 'label';
   let activeIndex = 0;
+  let characterCounter;
 
 	function updatePanel(e) {    
     activeIndex = e.detail.activeTabIndex;
   }
 </script>
 
-TextField
-
-
-<!--  -->
-<div class="component-container">
+<div id="root-container">
   <div class="component-demo component-demo--open">
     <div class="component-demo__content">
       <div class="component-demo__app-bar">
@@ -49,26 +46,39 @@ TextField
       <div class="component-demo__stage-content">
         <div id="filled" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 0} >
           <div class="inline-text-field-container">
-            <TextField id="TextField1" bind:value={text} {disabled} {label}/>
+            <TextField id="TextField1" bind:value={text} {disabled} {label} maxLength="100" >
+              <div slot="characterCounter">{#if characterCounter}<TextFieldCharacterCounter />{/if}</div>
+            </TextField>
           </div> 
         </div>
         <div id="outlined" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 1} >
           <div class="inline-text-field-container">
-            <TextField id="TextField2" bind:value={text} outlined {disabled} {label}/>
+            <TextField id="TextField2" bind:value={text} outlined {disabled} {label} maxLength="100" >
+             <div slot="characterCounter">{#if characterCounter}<TextFieldCharacterCounter />{/if}</div>                 
+            </TextField>
           </div>
         </div>
       </div>
       <div class="component-demo__config-panel">
         <div class="component-demo__panel-header"> 
           <div class="component-demo__panel-header-label">
-            IconButton
+            Configuration
           </div>      
         </div>
         <div class="text-field-options">
-          outlined
-          <Checkbox bind:checked={outlined} />
-          disabled
-          <Checkbox bind:checked={disabled} />
+          <span class="text-field-options__label">Options</span>
+          <div class="text-field-options__checkbox">
+            <div class="mdc-form-field">            
+              <Checkbox id="chk1" bind:checked={characterCounter} />
+              <label for="chk1" >Text Counter</label>
+            </div>
+          </div> 
+          <div class="text-field-options__checkbox">
+            <div class="mdc-form-field">            
+              <Checkbox id="chk2" bind:checked={disabled} />
+              <label for="chk2" >Disabled</label>
+            </div>
+          </div>          
         </div>
       </div>     
     </div>
@@ -94,10 +104,10 @@ TextField
 /* .stage-transition-container-variant{position:absolute;padding:40px;bottom:0;left:0;right:0;top:0;align-items:center;display:flex;justify-content:center;opacity:0;transition-duration:250ms;transition-property:opacity,visibility;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);visibility:hidden;z-index:0}
 .stage-transition-container-variant--show{opacity:1;visibility:visible} */
 
-  .component-container {
-    border: 1px solid rgba(0,0,0,.12);
-    width: 100%;
-    height: 400px;
+  #root-container {
+    height: 100%;
+    margin: 0;
+    padding: 0;
   }
   .component-demo {
     height: 100%;
@@ -202,5 +212,26 @@ TextField
     line-height: 1.25rem;
     font-weight: 400;
     opacity: .87;
+  }
+
+  .text-field-options__label {
+    font-family: Roboto,sans-serif;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-size: .875rem;
+    line-height: 1.375rem;
+    font-weight: 500;
+    letter-spacing: .0071428571em;
+    text-decoration: inherit;
+    text-transform: inherit;
+    display: block;
+    margin: 16px 0 8px;
+    padding: 0 12px;
+    line-height: 1.25rem;
+    font-weight: 400;
+    opacity: .87;
+  }
+  .text-field-options__checkbox {
+    padding: 0 0 0 8px;
   }
 </style>
