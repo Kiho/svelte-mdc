@@ -3,6 +3,7 @@
   import { MDCTextField } from "@material/textfield";
   import { processClasses } from "../helpers";
   import { Icon } from "../Icon";
+  import TextFieldCharacterCounter from './TextFieldCharacterCounter.svelte';
 
   const mdcAttrs = [
     "value",
@@ -16,20 +17,22 @@
 
   export let placeholder = '';
   export let id;
-  export let icon = null;
-  export let iconMode;
+  export let icon = '';
+  export let iconMode = '';
   export let name = '';
   export let disabled = false;
   export let value;
   export let label = '';
   export let outlined = false;
   export let type = 'text';
-  export let maxLength; 
+  export let maxLength;
+  export let helperText = '';
+  export let characterCounter = false;
+  export let min, max, step, pattern, required;
   // TextArea
   export let textarea = false;
   export let rows = 0;
   export let cols = 0;
-  export let helperText = '';
   
   export let textField;
   export let slots = $$props.$$slots || {};
@@ -67,40 +70,41 @@
     //   }
     // }
     // update();
+    console.log('icon', icon, iconMode);
   });
 
   onDestroy(() => {
     mdcComponent.destroy();
   });
 
-  // function update() {
-  //   console.log('update()');
-  //   for (let i = 0; i < arguments.length; i++) {
-  //     const key = mdcAttrs[i];
-  //     if (arguments[i] != mdcComponent[key]) {
-  //       console.log('result[i] != mdcComponent[i]', i, mdcAttrs[i], mdcComponent[i]);
-  //       mdcComponent[key] = result[i];
-  //     }
-  //   }
-  //   // if (mdcComponent) {
-  //   //   let result = Object.assign({}, $$props);
-  //   //   for (let key of mdcAttrs) {
-  //   //     if (result[key] != mdcComponent[key]) {
-  //   //       console.log('result[key] != mdcComponent[key]', key, result[key], mdcComponent[key]);
-  //   //       mdcComponent[key] = result[key];
-  //   //     }
-  //   //   }
-  //   // }
-  // }
-
-  function invalidate() {
-    console.log('invalidate()');
-    mdcComponent.destroy();
-    mdcComponent = MDCTextField.attachTo(textField);
+  function update() {
+    console.log('update()');
+    // for (let i = 0; i < arguments.length; i++) {
+    //   const key = mdcAttrs[i];
+    //   if (arguments[i] != mdcComponent[key]) {
+    //     console.log('result[i] != mdcComponent[i]', i, mdcAttrs[i], mdcComponent[i]);
+    //     mdcComponent[key] = result[i];
+    //   }
+    // }
+    if (mdcComponent) {
+      let result = Object.assign({}, $$props);
+      for (let key of mdcAttrs) {
+        if (result[key] != mdcComponent[key]) {
+          console.log('result[key] != mdcComponent[key]', key, result[key], mdcComponent[key]);
+          mdcComponent[key] = result[key];
+        }
+      }
+    }
   }
 
-  // $: update(value, min, max, step, maxLength, pattern, required)
-  $: helperText, outlined, label, iconMode, mdcComponent && invalidate();
+  // function invalidate() {
+  //   console.log('invalidate()');
+  //   mdcComponent.destroy();
+  //   mdcComponent = MDCTextField.attachTo(textField);
+  // }
+
+  $: update(value, min, max, step, maxLength, pattern, required)
+  // $: helperText, outlined, label, iconMode, mdcComponent && invalidate();
 
   export let inputAttrs;
   $: {
@@ -110,12 +114,12 @@
       result["aria-controls"] = elem;
       result["aria-describedby"] = elem;
     }
+    result["maxlength"] = maxLength;
     inputAttrs = result;
   }
 
   export let attrs;
-  $: {
-     console.log('slots', slots);     
+  $: { 
     let result = Object.assign({}, $$props);
     let cls = "mdc-text-field";
     let classes = [cls, "text-field"];
@@ -148,14 +152,13 @@
       delete result[key];      
     }
     result["class"] = processClasses(classes, result["class"]);
-    result["maxlength"] = maxLength;
     attrs = result;
   }
 </script>
 
 <div bind:this="{textField}" {...attrs}>
   {#if icon && iconMode === "leading"}
-  <Icon class="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
+  <Icon className="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
   {/if}
   {#if type === 'textarea'}
   <textarea
@@ -166,10 +169,10 @@
     rows="{rows}"
     cols="{cols}"
     {...inputAttrs}
-  >{value}</textarea>
+  />
   {:else}
   <input
-    type="{type}"
+    type="text"
     id="{id}"
     name="{name}"
     class="mdc-text-field__input"
@@ -178,7 +181,7 @@
   />
   {/if}
   {#if icon && iconMode === "trailing"}
-  <Icon class="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
+  <Icon className="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
   {/if} {#if outlined}
     <div class="mdc-notched-outline">
       <div class="mdc-notched-outline__leading"></div>
@@ -194,14 +197,16 @@
     <div class="mdc-line-ripple"></div>
   {/if}
 </div>
-{#if slots['helperText'] || slots['characterCounter']}
+{#if helperText || (characterCounter && maxLength)}
   <div class="mdc-text-field-helper-line">
     <div
       aria-hidden="true"
       class="mdc-text-field-helper-text"
     >
-      <slot name="helperText" />
+      {helperText}
     </div>
-    <slot name="characterCounter" />
+    {#if characterCounter}
+      <TextFieldCharacterCounter />
+    {/if}
   </div>
 {/if}

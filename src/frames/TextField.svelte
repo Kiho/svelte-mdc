@@ -8,7 +8,8 @@
     LayoutGridCell,
 		LayoutGridInner,
 		Menu, MenuItem,
-		Tab, TabBar, TabScroller
+		Tab, TabBar, TabScroller,
+    Radio
   } from '../components';
   import { TextField, TextFieldCharacterCounter } from '../components';
 
@@ -17,9 +18,28 @@
   export let outlined = true;
   export let disabled = false;
 
+  const icons = ['favorite', 'visibility'];
+  let icon;
+  let iconMode;
+  let leading = false;
+  let trailing = false;
+
+  $: if (leading) {
+    icon = icons[0];
+    iconMode = 'leading';
+  } 
+  $: if (trailing) {
+    icon = icons[1];
+    iconMode = 'trailing';
+  }
+  $: if (!leading && !trailing) {
+    icon = '';
+    iconMode = '';
+  }
+
   let label = 'label';
   let activeIndex = 0;
-  let characterCounter;
+  let characterCounter = false;
 
 	function updatePanel(e) {    
     activeIndex = e.detail.activeTabIndex;
@@ -46,16 +66,12 @@
       <div class="component-demo__stage-content">
         <div id="filled" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 0} >
           <div class="inline-text-field-container">
-            <TextField id="TextField1" bind:value={text} {disabled} {label} maxLength="100" >
-              <div slot="characterCounter">{#if characterCounter}<TextFieldCharacterCounter />{/if}</div>
-            </TextField>
+            <TextField id="TextField1" bind:value={text} {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} />
           </div> 
         </div>
         <div id="outlined" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 1} >
           <div class="inline-text-field-container">
-            <TextField id="TextField2" bind:value={text} outlined {disabled} {label} maxLength="100" >
-             <div slot="characterCounter">{#if characterCounter}<TextFieldCharacterCounter />{/if}</div>                 
-            </TextField>
+            <TextField id="TextField2" bind:value={text} outlined {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} />
           </div>
         </div>
       </div>
@@ -78,7 +94,34 @@
               <Checkbox id="chk2" bind:checked={disabled} />
               <label for="chk2" >Disabled</label>
             </div>
-          </div>          
+          </div>    
+          <div class="text-field-options__checkbox">
+            <div class="mdc-form-field">            
+              <Checkbox id="chk3" bind:checked={leading} />
+              <label for="chk3" >Leading Icon</label>
+            </div>
+          </div>     
+          <div class="text-field-options__checkbox">
+            <div class="mdc-form-field">            
+              <Checkbox id="chk4" bind:checked={trailing} />
+              <label for="chk4" >Trailing Icon</label>
+            </div>
+          </div>
+          <span class="text-field-options__label">Assistive text</span>
+          <div class="text-field-options__radio-group">
+            <div class="mdc-form-field">
+              <Radio id="radio1" name="assistive-text" />
+              <label for="radio1">None</label>
+            </div>
+            <div class="mdc-form-field">
+              <Radio id="radio1" name="assistive-text" />
+              <label for="radio1">Helper text</label>
+            </div>
+            <div class="mdc-form-field">
+              <Radio id="radio1" name="assistive-text" />
+              <label for="radio1">Error text</label>
+            </div> 
+          </div>
         </div>
       </div>     
     </div>
@@ -232,6 +275,9 @@
     opacity: .87;
   }
   .text-field-options__checkbox {
+    padding: 0 0 0 8px;
+  }
+  .text-field-options__radio-group {
     padding: 0 0 0 8px;
   }
 </style>

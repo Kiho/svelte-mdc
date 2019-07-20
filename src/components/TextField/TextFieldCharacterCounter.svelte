@@ -7,16 +7,23 @@
   export let maxLength;
 
   let self;
+  let input;
   let mdcComponent;
   let attrs, classes;
-  let cl = 0, ml;
+  let cl = 0, ml = 99999;
+  let inputHandler;
+
+  const onInput = () => {
+    currentLength = input.value.length;
+  };
 
   onMount(() => {
-    addClassToSlot(self, 'characterCounter', 'mdc-text-field-character-counter');
-    let input = self.parentElement.parentElement.previousElementSibling.querySelector('.mdc-text-field__input')
+    input = self.parentElement.previousElementSibling.querySelector('.mdc-text-field__input');
     if (input) {
-      ml = input.getAttribute('maxlength') || 9999;
-      cl = input.value.length;
+      maxLength = input.getAttribute('maxlength') || 99999;
+      ml = maxLength;
+      cl = currentLength = input.value.length;
+      inputHandler = input.addEventListener('input', onInput);
     }
     mdcComponent = MDCTextFieldCharacterCounter.attachTo(self);
     mdcComponent.foundation.setCounterValue(cl, ml);
@@ -24,19 +31,22 @@
 
   onDestroy(() => {
     if (mdcComponent) mdcComponent.destroy();
+    if (inputHandler) {
+      input.removeEventListener(inputHandler)
+    }
   });
 
   $: {
     cl = currentLength;
-    mdcComponent && mdcComponent.foundation.setCounterValue(currentLength, maxLength);
+    mdcComponent && mdcComponent.foundation.setCounterValue(cl, maxLength);
   }
-  // $: {
-  //   ml = maxLength;
-  //   mdcComponent && mdcComponent.foundation.setCounterValue(currentLength, maxLength);
-  // }
+  $: {
+    ml = maxLength;
+    mdcComponent && mdcComponent.foundation.setCounterValue(cl, ml);
+  }
 
 </script>
 
-<span bind:this={self}>
-  {currentLength} / {maxLength}
-</span>
+<div class="mdc-text-field-character-counter" bind:this={self}>
+  {cl} / {ml}
+</div>

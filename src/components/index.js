@@ -14,6 +14,6 @@ export * from './List';
 export * from './Tab';
 export * from './Menu';
 export * from './TextField';
-
+export * from './Radio';
 // import MTheme from './MTheme.svelte'
 
