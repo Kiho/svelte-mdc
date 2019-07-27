@@ -5,16 +5,6 @@
   import { Icon } from "../Icon";
   import TextFieldCharacterCounter from './TextFieldCharacterCounter.svelte';
 
-  const mdcAttrs = [
-    "value",
-    "min",
-    "max",
-    "step",
-    "maxLength",
-    "pattern",
-    "required"
-  ];
-
   export let placeholder = '';
   export let id;
   export let icon = '';
@@ -27,6 +17,7 @@
   export let type = 'text';
   export let maxLength;
   export let helperText = '';
+  export let invalid = false;
   export let characterCounter = false;
   export let min, max, step, pattern, required;
   // TextArea
@@ -35,7 +26,16 @@
   export let cols = 0;
   
   export let textField;
-  export let slots = $$props.$$slots || {};
+
+  const mdcAttrs = [
+    "value",
+    "min",
+    "max",
+    "step",
+    "maxLength",
+    "pattern",
+    "required"
+  ];
 
   const fieldAttrs = [
       "id",
@@ -53,39 +53,17 @@
     // mdcComponent = new MDCTextField(textField);
   });
 
-  // [svelte-upgrade warning]
-  // beforeUpdate and afterUpdate handlers behave
-  // differently to their v2 counterparts
-  beforeUpdate(() => {
-    // for (let key of mdcAttrs) {
-    //   if (changed[key]) {
-    //     mdcComponent[key] = current[key];
-    //   }
-    // }
-    // for (let key of ["iconMode", "helperText", "outlined", "label"]) {
-    //   if (changed[key]) {
-    //     mdcComponent.destroy();
-    //     mdcComponent = new MDCTextField(textField);
-    //     break;
-    //   }
-    // }
-    // update();
-    console.log('icon', icon, iconMode);
+  beforeUpdate(() => {    
+    // console.log('icon', icon, iconMode);
+    updateAttrs();
   });
 
   onDestroy(() => {
     mdcComponent.destroy();
   });
 
-  function update() {
+  function updateMdcAttrs() {
     console.log('update()');
-    // for (let i = 0; i < arguments.length; i++) {
-    //   const key = mdcAttrs[i];
-    //   if (arguments[i] != mdcComponent[key]) {
-    //     console.log('result[i] != mdcComponent[i]', i, mdcAttrs[i], mdcComponent[i]);
-    //     mdcComponent[key] = result[i];
-    //   }
-    // }
     if (mdcComponent) {
       let result = Object.assign({}, $$props);
       for (let key of mdcAttrs) {
@@ -96,6 +74,8 @@
       }
     }
   }
+  
+  $: updateMdcAttrs(value, min, max, step, maxLength, pattern, required);
 
   // function invalidate() {
   //   console.log('invalidate()');
@@ -103,23 +83,24 @@
   //   mdcComponent = MDCTextField.attachTo(textField);
   // }
 
-  $: update(value, min, max, step, maxLength, pattern, required)
   // $: helperText, outlined, label, iconMode, mdcComponent && invalidate();
 
   export let inputAttrs;
-  $: {
+  function updateInputAttrs() {
     var result = {};
     if (helperText) {
       let elem = id + "-helper-text";
       result["aria-controls"] = elem;
       result["aria-describedby"] = elem;
     }
-    result["maxlength"] = maxLength;
+    result["maxlength"] = maxLength;    
     inputAttrs = result;
   }
 
+  $: updateInputAttrs();
+
   export let attrs;
-  $: { 
+  function updateAttrs() { 
     let result = Object.assign({}, $$props);
     let cls = "mdc-text-field";
     let classes = [cls, "text-field"];
@@ -129,7 +110,8 @@
       "fullwidth",
       "outlined",
       "disabled",
-      "focused"
+      "focused",
+      "invalid"
     ]) {
       if (result[key]) {
         classes.push(cls + "--" + key);
@@ -151,8 +133,10 @@
     ]) {
       delete result[key];      
     }
+
     result["class"] = processClasses(classes, result["class"]);
-    attrs = result;
+    attrs = result;    
+    console.log('attrs', attrs);
   }
 </script>
 
@@ -201,7 +185,8 @@
   <div class="mdc-text-field-helper-line">
     <div
       aria-hidden="true"
-      class="mdc-text-field-helper-text"
+      class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent"
+      class:mdc-text-field-helper-text--validation-msg={invalid}
     >
       {helperText}
     </div>

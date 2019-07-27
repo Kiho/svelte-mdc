@@ -7,6 +7,10 @@
   export let radio;
   export let id;
   export let name;
+  export let group;
+  export let value;
+  export let attrs;
+  
   let mdcComponent;
 
   onMount(() => {
@@ -17,18 +21,6 @@
     mdcComponent && mdcComponent.destroy();
   });
 
-  // [svelte-upgrade warning]
-  // beforeUpdate and afterUpdate handlers behave
-  // differently to their v2 counterparts
-  beforeUpdate(() => {
-    // for (let key of attrKeys) {
-    //   if (changed[key]) {
-    //     mdcComponent[key] = current[key];
-    //   }
-    // }
-  });
-
-  export let attrs;
   $: {
     let result = Object.assign({}, $$props);
     let cls = "mdc-radio";
@@ -55,7 +47,9 @@
     class="mdc-radio__native-control"
     type="radio"
     id="{id}"
-    name="{name}"
+    {name}
+    bind:group
+    {value}
   />
   <div class="mdc-radio__background">
     <div class="mdc-radio__outer-circle"></div>

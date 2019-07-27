@@ -19,6 +19,7 @@
   export let disabled = false;
 
   const icons = ['favorite', 'visibility'];
+  const messages = ['Helper message', 'Error message'];
   let icon;
   let iconMode;
   let leading = false;
@@ -40,6 +41,24 @@
   let label = 'label';
   let activeIndex = 0;
   let characterCounter = false;
+  let invalid = false;
+  let helperText = '';
+  let errorMessage = '';
+  let selected = '';
+
+  $: {
+    console.log('selected', selected);
+    if (selected == 0) {
+      helperText = '';
+      invalid = false;
+    } else if (selected == 1) {
+      helperText = messages[0];
+      invalid = false;
+    } else if (selected == 2) {
+      helperText = messages[1];
+      invalid = true;
+    }
+  }
 
 	function updatePanel(e) {    
     activeIndex = e.detail.activeTabIndex;
@@ -66,12 +85,12 @@
       <div class="component-demo__stage-content">
         <div id="filled" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 0} >
           <div class="inline-text-field-container">
-            <TextField id="TextField1" bind:value={text} {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} />
+            <TextField id="TextField1" bind:value={text} {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} {helperText} {invalid} />
           </div> 
         </div>
         <div id="outlined" class="stage-transition-container-variant" class:stage-transition-container-variant--show={activeIndex == 1} >
           <div class="inline-text-field-container">
-            <TextField id="TextField2" bind:value={text} outlined {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} />
+            <TextField id="TextField2" bind:value={text} outlined {disabled} {label} maxLength="100" {characterCounter} {icon} {iconMode} {helperText} {invalid} />
           </div>
         </div>
       </div>
@@ -110,15 +129,15 @@
           <span class="text-field-options__label">Assistive text</span>
           <div class="text-field-options__radio-group">
             <div class="mdc-form-field">
-              <Radio id="radio1" name="assistive-text" />
+              <Radio id="radio1" name="assistive-text" bind:group={selected} value="0"/>
               <label for="radio1">None</label>
             </div>
             <div class="mdc-form-field">
-              <Radio id="radio1" name="assistive-text" />
+              <Radio id="radio1" name="assistive-text" bind:group={selected} value="1" />
               <label for="radio1">Helper text</label>
             </div>
             <div class="mdc-form-field">
-              <Radio id="radio1" name="assistive-text" />
+              <Radio id="radio1" name="assistive-text" bind:group={selected} value="2" />
               <label for="radio1">Error text</label>
             </div> 
           </div>
