@@ -23,6 +23,7 @@
   role="tab" 
   aria-selected="{active}"
   href="{href}"
+  on:click="{e=> e.preventDefault()}"
 >
   <span class="mdc-tab__content">
     {#if icon}
