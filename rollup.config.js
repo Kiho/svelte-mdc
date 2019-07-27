@@ -66,26 +66,6 @@ export default [
 
   // drawers
   {
-    input: 'src/frames/drawer2.js',
-    output: {
-      sourcemap: true,  
-      file: `${buildDir}/drawer2.js`,
-      format: 'iife',
-      name: 'drawer2'
-    },
-    plugins: [
-      resolve(),
-      commonjs({
-        namedExports: {
-          svelte: ['create', 'compile']
-        }
-      }),
-      svelte({
-        dev: !production,
-      })
-    ]
-  },
-  {
     input: 'src/frames/drawer.js',
     output: {
       sourcemap: !production,  
@@ -102,7 +82,29 @@ export default [
       }),
       svelte({
         dev: !production,
-      })
+      }),
+      production && terser()
+    ]
+  },
+  // textField
+  {
+    input: 'src/frames/text-field.js',
+    output: {
+      sourcemap: true,  
+      file: 'public/dist/text-field.js',
+      format: 'iife',
+      name: 'textField'
+    },
+    plugins: [
+      commonjs({
+        namedExports: {
+          svelte: ['create', 'compile']
+        }
+      }),
+      svelte({
+        dev: true,
+      }),
+      resolve(),
     ]
   }
 ];

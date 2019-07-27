@@ -1,0 +1,156 @@
+<script>
+  import { beforeUpdate, onDestroy, onMount } from "svelte";
+
+  // [svelte-upgrade suggestion]
+  // manually refactor all references to __this
+  const __this = {};
+
+  export let textArea;
+  export let helperText;
+
+  import { MDCTextField } from "@material/textfield";
+  import { MDCTextFieldIcon } from "@material/textfield/icon";
+
+  import { processClasses } from "./helpers.js";
+  const mdcAttrs = [
+    "value",
+    "min",
+    "max",
+    "step",
+    "maxLength",
+    "pattern",
+    "required"
+  ];
+  export let placeholder;
+  export let id;
+  export let icon;
+  export let iconMode;
+  export let name;
+  export let disabled;
+  export let rows;
+  export let cols;
+  export let value;
+  export let hintText;
+  export let outlined;
+
+  import Icon from "./Icon.html";
+
+  onMount(() => {
+    __this.mdcComponent = new MDCTextField(textArea);
+  });
+
+  // [svelte-upgrade warning]
+  // beforeUpdate and afterUpdate handlers behave
+  // differently to their v2 counterparts
+  beforeUpdate(() => {
+    if (!__this.mdcComponent) return;
+
+    for (let key of mdcAttrs) {
+      if (changed[key]) {
+        __this.mdcComponent[key] = current[key];
+      }
+    }
+    for (let key of ["helperText", "outlined", "hintText", "iconMode"]) {
+      if (changed[key]) {
+        __this.mdcComponent.destroy();
+        __this.mdcComponent = new MDCTextField(textArea);
+        break;
+      }
+    }
+  });
+
+  onDestroy(() => {
+    __this.mdcComponent.destroy();
+  });
+
+  export let inputAttrs;
+  $: {
+    var result = {};
+    if (helperText) {
+      let elem = id + "-helper-text";
+      result["aria-controls"] = elem;
+      result["aria-describedby"] = elem;
+    }
+    inputAttrs = result;
+  }
+
+  // [svelte-upgrade warning]
+  // this function needs to be manually rewritten
+  export let attrs;
+  $: {
+    let result = Object.assign({}, $$props);
+    let cls = "mdc-text-field";
+    let classes = [cls];
+    result.textarea = true;
+    for (let key of [
+      "box",
+      "textarea",
+      "dense",
+      "fullwidth",
+      "outlined",
+      "disabled",
+      "focused"
+    ]) {
+      if (result[key]) {
+        classes.push(cls + "--" + key);
+      }
+      delete result[key];
+    }
+    if (result.icon && result.iconMode) {
+      classes.push(cls + "--with-" + result.iconMode + "-icon");
+    }
+    for (let key of [
+      "id",
+      "name",
+      "type",
+      "helperText",
+      "rows",
+      "cols",
+      "inputAttrs",
+      "icon",
+      "iconMode",
+      ...mdcAttrs
+    ]) {
+      delete result[key];
+    }
+    result["class"] = processClasses(classes, result["class"]);
+    attrs = result;
+  }
+</script>
+
+<div bind:this="{textArea}" {...attrs}>
+  {#if icon && iconMode=="leading"}
+  <Icon class="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
+  {/if}
+  <textarea
+    id="{id}"
+    name="{name}"
+    class="mdc-text-field__input"
+    disabled="{disabled}"
+    rows="{rows}"
+    cols="{cols}"
+    {...inputAttrs}
+  >{value}</textarea>
+  {#if hintText}
+  <label class="mdc-floating-label" for="{id}">{hintText}</label>
+  {/if} {#if icon && iconMode=="trailing"}
+  <Icon class="mdc-text-field__icon" tabindex="0" role="button">{icon}</Icon>
+  {/if} {#if outlined}
+  <div class="mdc-notched-outline">
+    <svg>
+      <path class="mdc-notched-outline__path" />
+    </svg>
+  </div>
+  <div class="mdc-notched-outline__idle"></div>
+  {/if}
+</div>
+{#if helperText}
+<p
+  bind:this="{helperText}"
+  id="{id}-helper-text"
+  class="mdc-text-field-helper-text"
+  aria-hidden="true"
+>
+  {helperText}
+</p>
+{/if}

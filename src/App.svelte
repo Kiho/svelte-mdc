@@ -122,6 +122,18 @@
 		</LayoutGridCell>
 	</LayoutGridInner>
 
+	<Title>TextFields</Title>
+
+	<LayoutGridInner>
+		<LayoutGridCell span="12">
+			<div class="drawer-demo">
+				<div>
+					<iframe class="drawer-iframe" title="Text Fields" src="text-field.html"></iframe>
+				</div>
+			</div>
+		</LayoutGridCell>
+	</LayoutGridInner>
+
 	<Title>Drawers</Title>
 
 	<LayoutGridInner>
@@ -217,6 +229,6 @@
 	}
 	.drawer-iframe {
     width: 100%;
-    height: 400px;
+    height: 425px;
 	}
 </style>
