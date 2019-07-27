@@ -1,7 +1,7 @@
 {
   "name": "svelte-mdc",
   "description": "Material Design components for Svelte",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "author": "Kiho Chang",
   "license": "MIT",
   "module": "dist/svelte-mdc.mjs",
