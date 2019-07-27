@@ -90,8 +90,8 @@ export default [
   {
     input: 'src/frames/text-field.js',
     output: {
-      sourcemap: true,  
-      file: 'public/dist/text-field.js',
+      sourcemap: !production,  
+      file: `${buildDir}/text-field.js`,
       format: 'iife',
       name: 'textField'
     },
@@ -102,7 +102,7 @@ export default [
         }
       }),
       svelte({
-        dev: true,
+        dev: !production,
       }),
       resolve(),
     ]
