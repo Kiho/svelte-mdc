@@ -1,13 +1,7 @@
 <script>
 	import {
-		Button, Fab, Card, Checkbox,
-		Dialog, DialogButton, LinearProgress,
-		Icon, IconToggle,
-		Body, Subheading, Title, Display, Headline,
-    LayoutGrid,
-    LayoutGridCell,
-		LayoutGridInner,
-		Menu, MenuItem,
+		Checkbox,
+		Icon,
 		Tab, TabBar, TabScroller,
     Radio
   } from '../components';
@@ -148,24 +142,6 @@
 </div>
 
 <style>
-
-/* .component-demo__tab-section .mdc-tab-bar{width:auto}
-.component-demo__tab{padding-right:12px;padding-left:12px}
-.component-demo__tab .mdc-tab__text-label{color:rgba(0,0,0,.6)}
-.component-demo__tab.mdc-tab--active .mdc-tab__text-label{color:rgba(0,0,0,.87)}
-.component-demo__tab .mdc-tab-indicator__content--underline{border-color:#424242}
-.component-demo__tab .mdc-tab__ripple::before,.component-demo__tab .mdc-tab__ripple::after{background-color:#616161}
-.component-demo__tab .mdc-tab__ripple:hover::before{opacity:.04}
-.component-demo__tab .mdc-tab__ripple:not(.mdc-ripple-upgraded):focus::before,.component-demo__tab .mdc-tab__ripple.mdc-ripple-upgraded--background-focused::before{transition-duration:75ms;opacity:.12}
-.component-demo__tab .mdc-tab__ripple:not(.mdc-ripple-upgraded)::after{transition:opacity 150ms linear}
-.component-demo__tab .mdc-tab__ripple:not(.mdc-ripple-upgraded):active::after{transition-duration:75ms;opacity:.12}
-.component-demo__tab .mdc-tab__ripple.mdc-ripple-upgraded{--mdc-ripple-fg-opacity: 0.12}
-.component-demo__tab .mdc-tab-indicator{bottom:1px;height:auto}
-.component-demo__config-button,.component-demo__panel-header-close{border-radius:0;height:100%;color:#000;opacity:.54;transition:visibility 0s linear 225ms}
-.component-demo__config-button:hover,.component-demo__panel-header-close:hover{opacity:.87} */
-/* .stage-transition-container-variant{position:absolute;padding:40px;bottom:0;left:0;right:0;top:0;align-items:center;display:flex;justify-content:center;opacity:0;transition-duration:250ms;transition-property:opacity,visibility;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);visibility:hidden;z-index:0}
-.stage-transition-container-variant--show{opacity:1;visibility:visible} */
-
   #root-container {
     height: 100%;
     margin: 0;
@@ -193,10 +169,6 @@
   .component-demo--open .component-demo__content{width:calc(100% - 200px)}
   .component-demo--open .component-demo__config-panel{right:0}
   .component-demo--open .component-demo__config-button{visibility:hidden;transition-delay:0ms}
-
-  /* .component-demo__stage-content{background:#fff;flex:1 1 auto;min-height:250px;position:relative}
-  .component-demo__app-bar{background-color:#fff;flex-shrink:0;height:48px;padding-left:16px;padding-right:4px;border-bottom:1px solid #eee;display:flex}
-  .component-demo__tab-section{display:flex;flex:1 1 auto;justify-content:flex-start} */
 
   .component-demo__app-bar {
     background-color: #fff;
